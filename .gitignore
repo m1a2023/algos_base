@@ -1,3 +1,8 @@
 .vs
 /.vs
 .vs/
+
+algos_base/bin
+algos_base/obj
+algos_base/bin/
+algos_base/obj/
