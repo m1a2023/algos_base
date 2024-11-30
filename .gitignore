@@ -4,5 +4,12 @@
 
 algos_base/bin
 algos_base/obj
+
+/algos_base/bin
+/algos_base/obj
+
 algos_base/bin/
 algos_base/obj/
+
+/algos_base/obj/
+/algos_base/obj/

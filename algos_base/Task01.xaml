@@ -1,0 +1,43 @@
+﻿<Page x:Class="algos_base.Task01"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:algos_base"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="Task01">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Task 1: Sorting" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10"/>
+        <!-- Input Section -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+            <Grid>
+                <!-- TextBox for Input -->
+                <TextBox x:Name="InputTextBox" Width="300" Margin="0,0,10,0" TextChanged="InputTextBox_TextChanged"/>
+                <!-- Label for Placeholder -->
+                <Label x:Name="PlaceholderLabel" Content="Enter numbers separated by spaces..." 
+                    Foreground="Gray" Margin="5,0,0,0" IsHitTestVisible="False"
+                    VerticalAlignment="Center" HorizontalAlignment="Left" />
+            </Grid>
+            <Button Content="Selection Sort" Click="OnSelectionSortClick" Width="100" Margin="0,0,10,0"/>
+            <Button Content="Insertion Sort" Click="OnInsertionSortClick" Width="100"/>
+        </StackPanel>
+
+        <!-- Delay Slider -->
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
+            <Label Content="Delay (ms):" VerticalAlignment="Center"/>
+            <Slider x:Name="DelaySlider" Minimum="50" Maximum="1000" Value="500" Width="200" Margin="10,0"/>
+            <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50"/>
+        </StackPanel>
+
+        <!-- Logs Section -->
+        <ListBox x:Name="LogListBox" Grid.Row="2" />
+    </Grid>
+</Page>
