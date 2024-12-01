@@ -8,5 +8,5 @@ Word,Region,Country
 Ростов-на-Дону,Europe,Russia
 Самара,Europe,Russia
 Санкт-Петербург,Europe,Russia
-Челябинск,Europe,Russia
 Уфа,Asia,Russia
+Челябинск,Europe,Russia
