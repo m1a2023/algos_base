@@ -1,0 +1,11 @@
+Name,Continent,Capital,Area,Population
+Australia,Oceania,Canberra,7692024,25687041
+Canada,North America,Ottawa,9984670,38005238
+South Africa,Africa,Pretoria,1219090,59308690
+Germany,Europe,Berlin,357022,83240525
+Japan,Asia,Tokyo,377975,126476461
+Mexico,North America,Mexico City,1964375,128932753
+Russia,Europe,Moscow,17098246,144104080
+Nigeria,Africa,Abuja,923768,206139589
+Brazil,South America,Brasilia,8515767,212559417
+India,Asia,New Delhi,3287263,1393409038

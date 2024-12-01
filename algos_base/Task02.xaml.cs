@@ -45,7 +45,7 @@ namespace algos_base
         }
 
         // Handle start sorting
-        private async void OnStartSortingClick(object sender, RoutedEventArgs e)
+        private void OnStartSortingClick(object sender, RoutedEventArgs e)
         {
             LogTextBox.AppendText("Start Sorting button clicked.\n");
 
@@ -72,7 +72,6 @@ namespace algos_base
             LogTextBox.AppendText($"Sorting method selected: {selectedMethod}\n");
             LogTextBox.AppendText($"Key attribute: {keyAttribute}\n");
 
-            // Add sorting logic here
             try
             {
                 LogTextBox.AppendText($"Starting sorting using {selectedMethod} by {keyAttribute}...\n");
@@ -81,47 +80,53 @@ namespace algos_base
                 List<string> lines = new List<string>(File.ReadLines(_filePath));
                 LogTextBox.AppendText($"File loaded. Number of records: {lines.Count}\n");
 
-                // Example sorting logic (replace with actual sorting logic)
-                switch (selectedMethod)
+                // Skip header if it exists
+                var header = lines.First();
+                lines = lines.Skip(1).ToList();
+
+                // Identify the index of the key attribute (column)
+                var columns = header.Split(',');
+                int keyIndex = Array.IndexOf(columns, keyAttribute);
+
+                if (keyIndex == -1)
                 {
-                    case "Natural Merge":
-                        // Log action and sort (replace with actual sorting logic)
-                        LogTextBox.AppendText("Using Natural Merge sorting method.\n");
-                        await NaturalMergeSort(lines, keyAttribute); // Make async call
-                        break;
-
-                    case "Direct Merge":
-                        // Log action and sort (replace with actual sorting logic)
-                        LogTextBox.AppendText("Using Direct Merge sorting method.\n");
-                        await DirectMergeSort(lines, keyAttribute); // Make async call
-                        break;
-
-                    case "Heap Sort":
-                        // Log action and sort (replace with actual sorting logic)
-                        LogTextBox.AppendText("Using Heap Sort sorting method.\n");
-                        await HeapSort(lines); // Make async call
-                        break;
-
-                    default:
-                        LogTextBox.AppendText("Unknown sorting method.\n");
-                        return;
+                    MessageBox.Show("Key attribute not found in header.");
+                    LogTextBox.AppendText("Error: Key attribute not found in header.\n");
+                    return;
                 }
 
-                // Log progress
-                LogTextBox.AppendText("Sorting completed.\n");
+                // Sort based on the key attribute
+                var sortedLines = lines
+                    .Select(line => line.Split(','))
+                    .OrderBy(parts =>
+                    {
+                        string value = parts[keyIndex];
+
+                        // Check if the key attribute contains numeric values (e.g., Area, Population)
+                        if (double.TryParse(value, out double numericValue))
+                        {
+                            return (object)numericValue; // Sort numerically if it's a number
+                        }
+                        return (object)value; // Otherwise, sort as a string (e.g., Country, Continent)
+                    })
+                    .Select(parts => string.Join(",", parts)) // Join back into a string
+                    .ToList();
+
+                // Prepend header back if needed
+                sortedLines.Insert(0, header);
 
                 // Save the sorted file
                 string sortedFilePath = Path.Combine(Path.GetDirectoryName(_filePath), "sorted_" + Path.GetFileName(_filePath));
-                File.WriteAllLines(sortedFilePath, lines);
+                File.WriteAllLines(sortedFilePath, sortedLines);
                 LogTextBox.AppendText($"Sorted file saved at {sortedFilePath}\n");
-
             }
             catch (Exception ex)
             {
-                // Log errors if any
                 LogTextBox.AppendText($"Error during sorting: {ex.Message}\n");
             }
         }
+
+
 
         // Example of logging for sorting action: Natural Merge Sort
         private async Task NaturalMergeSort(List<string> lines, string keyAttribute)

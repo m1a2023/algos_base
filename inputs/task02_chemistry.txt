@@ -1,0 +1,11 @@
+Class,Name,Mass
+Organic,Methane,16
+Inorganic,Sodium Chloride,58
+Organic,Ethanol,46
+Inorganic,Potassium Nitrate,101
+Organic,Acetone,58
+Inorganic,Calcium Carbonate,100
+Organic,Benzene,78
+Inorganic,Magnesium Sulfate,120
+Organic,Toluene,92
+Inorganic,Ammonium Chloride,53

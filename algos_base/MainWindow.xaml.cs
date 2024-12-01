@@ -8,7 +8,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using algos_base.Models;
 
 namespace algos_base
 {
@@ -20,7 +19,6 @@ namespace algos_base
         public MainWindow()
         {
             InitializeComponent();
-            
         }
 
         private void OpenTask1(object sender, RoutedEventArgs e)
@@ -35,7 +33,7 @@ namespace algos_base
 
         private void OpenTask3(object sender, RoutedEventArgs e)
         {
-            //ContentFrame.Navigate(new Views.Task3Page());
+            ContentFrame.Navigate(new Task03());
         }
     }
 }
