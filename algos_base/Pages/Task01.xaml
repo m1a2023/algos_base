@@ -6,37 +6,50 @@
       xmlns:local="clr-namespace:algos_base"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="Task01">
+      Title="Task01" SizeChanged="Window_SizeChanged">
 
     <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!-- Input Section -->
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        
+        <Viewbox Grid.Column="0" Stretch="Uniform">
+            <Canvas x:Name="SortingCanvas" Background="LightGray" Height="400" />
+        </Viewbox>
+        
+        <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10">
             <Grid>
-                <!-- TextBox for Input -->
-                <TextBox x:Name="InputTextBox" Width="300" Margin="0,0,10,0" TextChanged="InputTextBox_TextChanged"/>
-                <!-- Label for Placeholder -->
-                <Label x:Name="PlaceholderLabel" Content="Enter numbers separated by spaces..." 
-                    Foreground="Gray" Margin="5,0,0,0" IsHitTestVisible="False"
-                    VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <TextBox x:Name="CountTextBox" Width="200" Margin="0, 10" 
+                         Text="Elements amount" TextAlignment="Center" 
+                         HorizontalAlignment="Stretch" VerticalContentAlignment="Center" 
+                         TextWrapping="Wrap" HorizontalScrollBarVisibility="Hidden" 
+                         VerticalScrollBarVisibility="Auto"
+                         GotFocus="CountTextBox_GotFocus" LostFocus="CountTextBox_LostFocus"/>
             </Grid>
-            <Button Content="Selection Sort" Click="OnSelectionSortClick" Width="100" Margin="0,0,10,0"/>
-            <Button Content="Insertion Sort" Click="OnInsertionSortClick" Width="100"/>
+            
+            <Button x:Name="SelectionSortButton" Content="Selection Sort" Click="OnSelectionSortClick" Width="200" Margin="0, 10"/>
+            <Button x:Name="InsertionSortButton" Content="Insertion Sort" Click="OnInsertionSortClick" Width="200" Margin="0, 10"/>
+            
+            <Button x:Name="PauseButton" Content="Pause" Click="OnPauseButtonClick" Width="200" Margin="0, 10" IsEnabled="False"/>
+            
+            <StackPanel Orientation="Horizontal" Margin="0, 10">
+                <Label Content="Delay (ms):" VerticalAlignment="Center"/>
+                <Slider x:Name="DelaySlider" Minimum="1" Maximum="1000" Value="500" Width="200" Margin="10,0"/>
+                <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50"/>
+            </StackPanel>
+            
+            <ListBox x:Name="LogListBox" Height="150" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap" MaxWidth="300" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
-
-        <!-- Delay Slider -->
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
-            <Label Content="Delay (ms):" VerticalAlignment="Center"/>
-            <Slider x:Name="DelaySlider" Minimum="50" Maximum="1000" Value="500" Width="200" Margin="10,0"/>
-            <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50"/>
-        </StackPanel>
-
-        <!-- Logs Section -->
-        <ListBox x:Name="LogListBox" Grid.Row="2" />
+        
+        <Button x:Name="PreviousPageButton" Content="&#8592;" HorizontalAlignment="Left" VerticalAlignment="Top" Width="40" Height="40" Margin="10" 
+                Click="PreviousPageButtonClick" FontSize="20" Background="#FFDDDDDD" BorderBrush="Gray" BorderThickness="1" 
+                HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
     </Grid>
 </Page>

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("algos_base")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d00ed42f54215fa25760584ab182a020ad045dce")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7de4d7882cdd0754be3a50325d63f281cbed9346")]
 [assembly: System.Reflection.AssemblyProductAttribute("algos_base")]
 [assembly: System.Reflection.AssemblyTitleAttribute("algos_base")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
