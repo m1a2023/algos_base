@@ -19,21 +19,13 @@ namespace algos_base
         public MainWindow()
         {
             InitializeComponent();
+            Loaded += MainWindow_Loaded;
         }
 
-        private void OpenTask1(object sender, RoutedEventArgs e)
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            ContentFrame.Navigate(new Task01());
-        }
-
-        private void OpenTask2(object sender, RoutedEventArgs e)
-        {
-            ContentFrame.Navigate(new Task02());
-        }
-
-        private void OpenTask3(object sender, RoutedEventArgs e)
-        {
-            ContentFrame.Navigate(new Task03());
+            MinWidth = Width;
+            MinHeight = Height;
         }
     }
 }

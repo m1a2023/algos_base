@@ -1,0 +1,21 @@
+<Page x:Class="algos_base.Start"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Task Manager">
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid>
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
+            <Button Content="Task 1: Sorting" Style="{StaticResource MainButtonStyle}" Click="OpenTask1"/>
+            <Button Content="Task 2: External Sorting" Style="{StaticResource MainButtonStyle}" Click="OpenTask2"/>
+            <Button Content="Task 3: Words Sorting" Style="{StaticResource MainButtonStyle}" Click="OpenTask3"/>
+        </StackPanel>
+    </Grid>
+</Page>
