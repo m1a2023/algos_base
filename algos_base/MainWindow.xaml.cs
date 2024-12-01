@@ -20,7 +20,7 @@ namespace algos_base
         public MainWindow()
         {
             InitializeComponent();
-
+            
         }
 
         private void OpenTask1(object sender, RoutedEventArgs e)
@@ -30,12 +30,12 @@ namespace algos_base
 
         private void OpenTask2(object sender, RoutedEventArgs e)
         {
-            //ContentFrame.Navigate(new Task02());
+            ContentFrame.Navigate(new Task02());
         }
 
-        //private void OpenTask3(object sender, RoutedEventArgs e)
-        //{
-        //    ContentFrame.Navigate(new Views.Task3Page());
-        //}
+        private void OpenTask3(object sender, RoutedEventArgs e)
+        {
+            //ContentFrame.Navigate(new Views.Task3Page());
+        }
     }
 }

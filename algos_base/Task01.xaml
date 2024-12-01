@@ -15,7 +15,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Task 1: Sorting" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10"/>
         <!-- Input Section -->
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
             <Grid>
