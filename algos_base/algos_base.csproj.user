@@ -6,28 +6,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Task02.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Task01.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Task03.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Page Update="MainWindow.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Task02.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Task01.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Task03.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
