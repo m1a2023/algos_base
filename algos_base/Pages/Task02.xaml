@@ -6,6 +6,14 @@
       mc:Ignorable="d" 
       Title="Task02 - External Sorting" SizeChanged="Window_SizeChanged">
 
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -14,58 +22,61 @@
 
         <!-- Canvas Section -->
         <Viewbox Grid.Column="0" Stretch="Uniform">
-            <Canvas x:Name="SortingCanvas" Background="LightGray" Height="400"/>
+            <Canvas x:Name="SortingCanvas" Background="LightGray" Height="400" />
         </Viewbox>
 
         <!-- Control Panel Section -->
-        <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10">
-            
-            <!-- Sorting Method Section -->
-            <StackPanel Orientation="Horizontal" Margin="0, 10">
-                <Label Content="Sorting Method:" VerticalAlignment="Center" />
-                <ComboBox x:Name="SortingMethodComboBox" Width="200" Height="30">
-                    <ComboBoxItem Content="Natural Merge" />
-                    <ComboBoxItem Content="Direct Merge" />
-                    <ComboBoxItem Content="Heap Sort" />
-                </ComboBox>
+        <Viewbox Grid.Column="1" Stretch="Uniform" Margin="10">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top">
+
+                <!-- Sorting Method Section -->
+                <StackPanel Orientation="Horizontal" Margin="0, 10">
+                    <Label Content="Sorting Method:" VerticalAlignment="Center" FontSize="18"/>
+                    <ComboBox x:Name="SortingMethodComboBox" Width="200" Height="30" Margin="10, 0">
+                        <ComboBoxItem Content="Natural Merge" />
+                        <ComboBoxItem Content="Direct Merge" />
+                        <ComboBoxItem Content="Heap Sort" />
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Delay Slider Section -->
+                <StackPanel Orientation="Horizontal" Margin="0, 10">
+                    <Label Content="Delay (ms):" VerticalAlignment="Center" FontSize="18"/>
+                    <Slider x:Name="DelaySlider" Width="200" Minimum="0" Maximum="2000" Value="500" TickFrequency="100" IsSnapToTickEnabled="True" Margin="10,0"/>
+                    <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50" FontSize="18"/>
+                </StackPanel>
+
+                <!-- File Selection Section -->
+                <StackPanel Orientation="Horizontal" Margin="0, 10">
+                    <Label Content="Select File:" VerticalAlignment="Center" FontSize="18"/>
+                    <Button Content="Browse" Width="100" Height="30" Margin="10,0" Click="OnBrowseButtonClick"/>
+                </StackPanel>
+
+                <!-- Key Attribute Section -->
+                <StackPanel Orientation="Horizontal" Margin="0, 10">
+                    <Label Content="Key Attribute:" VerticalAlignment="Center" FontSize="18"/>
+                    <ComboBox x:Name="KeyAttributeComboBox" Width="200" Height="30" Margin="10,0"/>
+                </StackPanel>
+
+                <!-- Start/Stop Button -->
+                <Button x:Name="StartStopButton" Content="Start Sorting" Width="150" Height="40" Style="{StaticResource MainButtonStyle}" Margin="0, 10"
+                        Click="OnStartSortingClick"/>
+
+                <!-- Logs Section -->
+                <ListBox x:Name="LogTextBox" Height="150" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="0, 10"
+                         ItemsSource="{Binding LogMessages}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" TextWrapping="Wrap" MaxWidth="300" FontSize="18"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </StackPanel>
-
-            <!-- Delay Slider Section -->
-            <StackPanel Orientation="Horizontal" Margin="0, 10">
-                <Label Content="Delay (ms):" VerticalAlignment="Center" />
-                <Slider x:Name="DelaySlider" Width="200" Minimum="0" Maximum="2000" Value="500" TickFrequency="100" IsSnapToTickEnabled="True"/>
-                <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50"/>
-            </StackPanel>
-
-            <!-- File Selection Section -->
-            <StackPanel Orientation="Horizontal" Margin="0, 10">
-                <Label Content="Select File:" VerticalAlignment="Center" />
-                <Button Content="Browse" Width="100" Height="30" Click="OnBrowseButtonClick"/>
-            </StackPanel>
-
-            <!-- Key Attribute Section -->
-            <StackPanel Orientation="Horizontal" Margin="0, 10">
-                <Label Content="Key Attribute:" VerticalAlignment="Center" />
-                <ComboBox x:Name="KeyAttributeComboBox" Width="200" Margin="10"/>
-            </StackPanel>
-
-            <!-- Start/Stop Button -->
-            <Button x:Name="StartStopButton" Content="Start Sorting" Width="150" Height="40" Click="OnStartSortingClick" Margin="0, 10"/>
-
-            <!-- Logs Section -->
-            <ListBox x:Name="LogTextBox" Height="150" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="0, 10"
-                     ItemsSource="{Binding LogMessages}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}" TextWrapping="Wrap" MaxWidth="300" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </StackPanel>
+        </Viewbox>
 
         <!-- Back Button -->
         <Button x:Name="PreviousPageButton" Content="&#8592;" HorizontalAlignment="Left" VerticalAlignment="Top" Width="40" Height="40" Margin="10" 
-                Click="PreviousPageButtonClick" FontSize="20" Background="#FFDDDDDD" BorderBrush="Gray" BorderThickness="1" 
+                Style="{StaticResource MainButtonStyle}" Click="PreviousPageButtonClick" FontSize="20"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
     </Grid>
 </Page>
