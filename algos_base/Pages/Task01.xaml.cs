@@ -24,10 +24,8 @@ namespace algos_base
         
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            SortingCanvas.Width = e.NewSize.Width;
-            SortingCanvas.Height = e.NewSize.Height;
+            UpdateBarPositions();
         }
-
         private async void OnSelectionSortClick(object sender, RoutedEventArgs e)
         {
             if (!TryParseInput(out int[] array)) return;
@@ -81,27 +79,192 @@ namespace algos_base
 
             MessageBox.Show("Sorting Completed!", "Success");
         }
+        
+        private async void OnHeapSortClick(object sender, RoutedEventArgs e)
+        {
+            if (!TryParseInput(out int[] array)) return;
+
+            numbers = array;
+            rectangles = new Rectangle[numbers.Length];
+            SortingCanvas.Children.Clear();
+    
+            DrawBars();
+
+            LogListBox.Items.Clear();
+    
+            SetButtonsEnabled(false);
+
+            isSorting = true;
+            PauseButton.IsEnabled = true;
+
+            await HeapSort(numbers);
+            isSorting = false;
+    
+            SetButtonsEnabled(true);
+    
+            PauseButton.IsEnabled = false;
+
+            MessageBox.Show("Sorting Completed!", "Success");
+        }
+
+        private async void OnQuickSortClick(object sender, RoutedEventArgs e)
+        {
+            if (!TryParseInput(out int[] array)) return;
+
+            numbers = array;
+            rectangles = new Rectangle[numbers.Length];
+            SortingCanvas.Children.Clear();
+    
+            DrawBars();
+
+            LogListBox.Items.Clear();
+    
+            SetButtonsEnabled(false);
+
+            isSorting = true;
+            PauseButton.IsEnabled = true;
+
+            await QuickSort(numbers, 0, numbers.Length - 1);
+            isSorting = false;
+    
+            SetButtonsEnabled(true);
+    
+            PauseButton.IsEnabled = false;
+
+            MessageBox.Show("Sorting Completed!", "Success");
+        }
+        
+        private async Task HeapSort(int[] array)
+        {
+            int n = array.Length;
+
+            // Построение кучи (перегруппировка массива)
+            for (int i = n / 2 - 1; i >= 0; i--)
+            {
+                await Heapify(array, n, i);
+            }
+
+            // Один за другим извлекаем элементы из кучи
+            for (int i = n - 1; i > 0; i--)
+            {
+                if (isBackPressed) return;
+                if (isPaused) await WaitForResume();
+
+                // Перемещаем текущий корень в конец
+                Log($"Swapping: {array[0]} and {array[i]}");
+                (array[0], array[i]) = (array[i], array[0]);
+                UpdateBarPositions();
+
+                // Вызываем heapify на уменьшенной куче
+                await Heapify(array, i, 0);
+                await Delay();
+            }
+        }
+
+        private async Task Heapify(int[] array, int n, int i)
+        {
+            int largest = i;
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;
+
+            if (left < n && array[left] > array[largest])
+            {
+                largest = left;
+            }
+
+            if (right < n && array[right] > array[largest])
+            {
+                largest = right;
+            }
+
+            if (largest != i)
+            {
+                Log($"Swapping: {array[i]} and {array[largest]}");
+                (array[i], array[largest]) = (array[largest], array[i]);
+                UpdateBarPositions();
+                await Heapify(array, n, largest);
+            }
+        }
+        
+        private async Task QuickSort(int[] array, int low, int high)
+        {
+            if (low < high)
+            {
+                if (isBackPressed) return;
+                if (isPaused) await WaitForResume();
+
+                int pivotIndex = await Partition(array, low, high);
+
+                await QuickSort(array, low, pivotIndex - 1);
+                await QuickSort(array, pivotIndex + 1, high);
+            }
+        }
+
+        private async Task<int> Partition(int[] array, int low, int high)
+        {
+            int pivot = array[high];
+            Log($"Pivot: {pivot}");
+            int i = (low - 1);
+
+            for (int j = low; j < high; j++)
+            {
+                if (isBackPressed) return -1;
+                if (isPaused) await WaitForResume();
+
+                if (array[j] < pivot)
+                {
+                    i++;
+                    Log($"Swapping: {array[i]} and {array[j]}");
+                    (array[i], array[j]) = (array[j], array[i]);
+                    UpdateBarPositions();
+                }
+
+                await Delay();
+            }
+
+            Log($"Swapping: {array[i + 1]} and {array[high]}");
+            (array[i + 1], array[high]) = (array[high], array[i + 1]);
+            UpdateBarPositions();
+
+            return i + 1;
+        }
+
 
         private void DrawBars()
         {
             double barWidth = SortingCanvas.ActualWidth / numbers.Length;
+            double canvasHeight = SortingCanvas.ActualHeight;
+
+            // Ограничиваем минимальную ширину бара, чтобы избежать ошибок
+            double minBarWidth = 5; // минимальная ширина бара
+            barWidth = Math.Max(barWidth, minBarWidth); // Применяем минимальную ширину
 
             for (int i = 0; i < numbers.Length; i++)
             {
-                double barHeight = numbers[i] * 2;
+                // Adjust the initial bar height relative to the canvas height
+                double barHeight = numbers[i] * (canvasHeight / 100);
+        
+                // Проверяем, что ширина и высота бара валидны
+                if (barWidth <= 0 || barHeight <= 0)
+                {
+                    continue; // Пропускаем такие элементы
+                }
+
                 var rect = new Rectangle
                 {
                     Width = barWidth - 2,
                     Height = barHeight,
                     Fill = Brushes.Blue
                 };
-                
+
                 Canvas.SetLeft(rect, i * barWidth);
                 Canvas.SetBottom(rect, 0);
                 SortingCanvas.Children.Add(rect);
                 rectangles[i] = rect;
             }
         }
+
+
 
         private async Task SelectionSort(int[] array)
         {
@@ -176,6 +339,8 @@ namespace algos_base
 
         private void UpdateBarPositions()
         {
+            if (numbers == null || numbers.Length == 0) return;
+
             double barWidth = SortingCanvas.ActualWidth / numbers.Length;
 
             for (int i = 0; i < numbers.Length; i++)
@@ -184,7 +349,6 @@ namespace algos_base
                 rectangles[i].Height = numbers[i] * 2;
             }
         }
-
         private void Log(string message)
         {
             LogListBox.Items.Add(message);
@@ -210,6 +374,14 @@ namespace algos_base
             try
             {
                 int n = int.Parse(input);
+
+                // Check if the value exceeds 1000
+                if (n > 1000)
+                {
+                    MessageBox.Show("The number of elements cannot exceed 1000.", "Error");
+                    return false;
+                }
+
                 array = GenerateRandomArray(n);
                 return true;
             }
@@ -219,6 +391,7 @@ namespace algos_base
                 return false;
             }
         }
+
 
         private int[] GenerateRandomArray(int n)
         {
@@ -230,8 +403,11 @@ namespace algos_base
         {
             SelectionSortButton.IsEnabled = enabled;
             InsertionSortButton.IsEnabled = enabled;
+            HeapSortButton.IsEnabled = enabled;
+            QuickSortButton.IsEnabled = enabled;
             PauseButton.IsEnabled = enabled;
         }
+
         
         private void CountTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
