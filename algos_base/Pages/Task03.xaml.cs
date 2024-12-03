@@ -16,6 +16,11 @@ namespace algos_base
         {
             InitializeComponent();
         }
+        
+        private void PreviousPageButtonClick(object sender, RoutedEventArgs e)
+        {
+            NavigationService.GoBack();
+        }
 
         // Handle file browsing
         private void OnBrowseButtonClick(object sender, RoutedEventArgs e)

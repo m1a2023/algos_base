@@ -7,23 +7,32 @@
       Title="Task03 - Word Sorting">
 
     <Grid Margin="10">
-        <!-- File Selection Section -->
-        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,10,0,0" FontWeight="Bold">Select File:</TextBlock>
-        <Button Content="Browse" Width="100" Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,10,0,0" Click="OnBrowseButtonClick"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Верхняя строка для кнопки возврата -->
+            <RowDefinition Height="*"/>    <!-- Лог с динамической высотой -->
+            <RowDefinition Height="60"/>   <!-- Контролы с фиксированной высотой -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Sorting Method Section -->
-        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,50,0,0" FontWeight="Bold">Sorting Method:</TextBlock>
-        <ComboBox x:Name="SortingMethodComboBox" Width="200" Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,50,0,0">
-            <ComboBoxItem>QuickSort</ComboBoxItem>
-            <ComboBoxItem>RadixSort</ComboBoxItem>
-        </ComboBox>
+        <TextBox x:Name="LogTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,20,0,0" 
+                 IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" Grid.Row="1" Grid.ColumnSpan="2"/>
+        
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0">
+            <Label Content="Select File:" VerticalAlignment="Center" />
+            <Button Content="Browse" Width="100" Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Click="OnBrowseButtonClick"/>
+            <Label Content="Sorting Method:" VerticalAlignment="Center" Margin="20,0,0,0"/>
+            <ComboBox x:Name="SortingMethodComboBox" Width="200" Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0">
+                <ComboBoxItem Content="QuickSort"/>
+                <ComboBoxItem Content="RadixSort"/>
+            </ComboBox>
+            <Button Content="Start Sorting" Width="150" Height="40" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,0,0,0" Click="OnStartSortingClick"/>
+        </StackPanel>
 
-        <!-- Start Sorting Button -->
-        <Button Content="Start Sorting" Width="150" Height="40" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,90,0,0" Click="OnStartSortingClick"/>
-
-        <!-- Logs Section -->
-        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,150,0,0" FontWeight="Bold">Logs:</TextBlock>
-        <TextBox x:Name="LogTextBox" Width="560" Height="200" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,180,0,0" IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="True"/>
+        <Button x:Name="PreviousPageButton" Content="&#8592;" HorizontalAlignment="Left" VerticalAlignment="Top" Width="40" Height="40" Margin="10" 
+                Click="PreviousPageButtonClick" FontSize="20" Background="#FFDDDDDD" BorderBrush="Gray" BorderThickness="1"
+                HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Grid.Row="0" Grid.Column="0"/>
     </Grid>
 </Page>
-
