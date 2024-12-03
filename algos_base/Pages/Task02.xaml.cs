@@ -48,14 +48,34 @@ namespace algos_base
             {
                 _filePath = openFileDialog.FileName;
                 LogTextBox.Items.Add($"File selected: {_filePath}\n");
+
+                // Загружаем столбцы в ComboBox
+                LoadColumnsFromFile(_filePath);
             }
             else
             {
                 LogTextBox.Items.Add("No file selected.\n");
             }
         }
+        private void LoadColumnsFromFile(string filePath)
+        {
+            try
+            {
+                var workbook = new XLWorkbook(filePath);
+                var worksheet = workbook.Worksheet(1);
+                var header = worksheet.Row(1).Cells().Select(c => c.Value.ToString()).ToList();
 
+                // Заполняем ComboBox названиями столбцов
+                KeyAttributeComboBox.ItemsSource = header;
+                KeyAttributeComboBox.SelectedIndex = 0;  // Выбираем первый столбец по умолчанию
 
+                LogTextBox.Items.Add("Columns loaded into ComboBox.\n");
+            }
+            catch (Exception ex)
+            {
+                LogTextBox.Items.Add($"Error loading columns: {ex.Message}\n");
+            }
+        }
         private async void OnStartSortingClick(object sender, RoutedEventArgs e)
         {
             LogTextBox.Items.Add("Start Sorting button clicked.\n");
@@ -68,7 +88,7 @@ namespace algos_base
             }
 
             string selectedMethod = ((ComboBoxItem)SortingMethodComboBox.SelectedItem)?.Content?.ToString();
-            string keyAttribute = KeyAttributeTextBox.Text;
+            string keyAttribute = KeyAttributeComboBox.SelectedItem?.ToString();  // Получаем выбранный ключевой атрибут
 
             if (string.IsNullOrEmpty(selectedMethod) || string.IsNullOrEmpty(keyAttribute))
             {
@@ -96,7 +116,7 @@ namespace algos_base
                 LogTextBox.Items.Add($"Sorting method selected: {selectedMethod}\n");
                 LogTextBox.Items.Add($"Key attribute: {keyAttribute}\n");
 
-                // Сортировка в зависимости от выбранного метода
+                // Вызов соответствующего метода сортировки
                 switch (selectedMethod)
                 {
                     case "Natural Merge":
@@ -143,7 +163,6 @@ namespace algos_base
                 LogTextBox.Items.Add($"Error during sorting: {ex.Message}\n");
             }
         }
-
         private async Task NaturalMergeSort(List<IXLRow> rows, int keyIndex)
         {
             LogTextBox.Items.Add("Natural Merge Sort started...\n");

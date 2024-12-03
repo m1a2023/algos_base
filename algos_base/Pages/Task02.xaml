@@ -46,7 +46,7 @@
             <!-- Key Attribute Section -->
             <StackPanel Orientation="Horizontal" Margin="0, 10">
                 <Label Content="Key Attribute:" VerticalAlignment="Center" />
-                <TextBox x:Name="KeyAttributeTextBox" Width="200" Height="30"/>
+                <ComboBox x:Name="KeyAttributeComboBox" Width="200" Margin="10"/>
             </StackPanel>
 
             <!-- Start/Stop Button -->
