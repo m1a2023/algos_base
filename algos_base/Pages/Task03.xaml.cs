@@ -4,6 +4,7 @@ using System.Diagnostics;  // Для измерения времени
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -27,28 +28,28 @@ namespace algos_base
 
         private void OnBrowseButtonClick(object sender, RoutedEventArgs e)
         {
-            LogTextBox.AppendText("Browse button clicked. Opening file dialog...\n");
+            LogTextBoxAppendText("Browse button clicked. Opening file dialog...\n");
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)
             {
                 _filePath = openFileDialog.FileName;
-                LogTextBox.AppendText($"File selected: {_filePath}\n");
+                LogTextBoxAppendText($"File selected: {_filePath}\n");
             }
             else
             {
-                LogTextBox.AppendText("No file selected.\n");
+                LogTextBoxAppendText("No file selected.\n");
             }
         }
 
         private async void OnStartSortingClick(object sender, RoutedEventArgs e)
         {
-            LogTextBox.AppendText("Start Sorting button clicked.\n");
+            LogTextBoxAppendText("Start Sorting button clicked.\n");
 
             if (string.IsNullOrEmpty(_filePath))
             {
                 MessageBox.Show("Please select a file first.");
-                LogTextBox.AppendText("Error: No file selected.\n");
+                LogTextBoxAppendText("Error: No file selected.\n");
                 return;
             }
 
@@ -56,22 +57,23 @@ namespace algos_base
             if (string.IsNullOrEmpty(selectedMethod))
             {
                 MessageBox.Show("Please select sorting method.");
-                LogTextBox.AppendText("Error: Sorting method not selected.\n");
+                LogTextBoxAppendText("Error: Sorting method not selected.\n");
                 return;
             }
 
-            LogTextBox.AppendText($"Sorting method selected: {selectedMethod}\n");
+            LogTextBoxAppendText($"Sorting method selected: {selectedMethod}\n");
 
             try
             {
                 // Стартуем измерение времени
                 _stopwatch.Start();
 
-                LogTextBox.AppendText($"Starting sorting using {selectedMethod}...\n");
+                LogTextBoxAppendText($"Starting sorting using {selectedMethod}...\n");
 
+                // Загрузка слов из файла и очистка от символов
                 List<string> words = new List<string>(File.ReadLines(_filePath)
                     .SelectMany(line => line.Split(new[] { ' ', '\t', '\n', '\r', '.', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries)
-                                                .Select(word => word.ToLower())));
+                                            .Select(word => CleanWord(word))));
 
                 // Безопасное обновление UI
                 Dispatcher.Invoke(() => LogTextBox.AppendText($"File loaded. Number of words: {words.Count}\n"));
@@ -109,12 +111,13 @@ namespace algos_base
                 Dispatcher.Invoke(() => LogTextBox.AppendText($"Error during sorting: {ex.Message}\n"));
             }
         }
-        private List<string> LoadWordsFromFile(string filePath)
+
+        private string CleanWord(string word)
         {
-            return new List<string>(File.ReadLines(filePath)
-                .SelectMany(line => line.Split(new[] { ' ', '\t', '\n', '\r', '.', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(word => word.ToLower())));
+            // Удаляем все символы, которые не являются буквами (a-z, A-Z)
+            return new string(word.Where(c => char.IsLetter(c)).ToArray()).ToLower();
         }
+
         private async Task QuickSort(List<string> words, int low, int high)
         {
             if (low < high)
@@ -142,6 +145,7 @@ namespace algos_base
             Swap(words, i + 1, high);
             return i + 1;
         }
+
         private void Swap(List<string> words, int i, int j)
         {
             string temp = words[i];
@@ -151,7 +155,7 @@ namespace algos_base
 
         private async Task RadixSort(List<string> words)
         {
-            LogTextBox.AppendText("Starting Radix Sort...\n");
+            LogTextBoxAppendText("Starting Radix Sort...\n");
 
             int maxLength = words.Max(w => w.Length);
 
@@ -163,13 +167,19 @@ namespace algos_base
 
                 foreach (var word in words)
                 {
-                    int charIndex = digitPosition < word.Length ? word[word.Length - digitPosition - 1] - 'a' : -1;
-                    if (charIndex >= 0)
+                    // Проверка, что позиция символа в слове существует
+                    int charIndex = digitPosition < word.Length 
+                        ? char.ToLower(word[word.Length - digitPosition - 1]) - 'a' 
+                        : -1;
+
+                    // Если символ не является буквой (или не существует на этой позиции), добавляем в последний бакет
+                    if (charIndex >= 0 && charIndex < 26)
                     {
                         buckets[charIndex].Add(word);
                     }
                     else
                     {
+                        // Все слова, которые не имеют буквы на данной позиции, помещаем в последний бакет
                         buckets[25].Add(word);
                     }
                 }
@@ -184,8 +194,9 @@ namespace algos_base
                 Dispatcher.Invoke(() => LogTextBox.AppendText($"After processing digit position {digitPosition}, words are sorted.\n"));
             }
 
-            LogTextBox.AppendText("Radix Sort completed.\n");
+            LogTextBoxAppendText("Radix Sort completed.\n");
         }
+
 
         private async Task CountWords(List<string> words)
         {
@@ -234,6 +245,15 @@ namespace algos_base
             Dispatcher.Invoke(() =>
             {
                 LogTextBox.AppendText("\nCounting words finished.\n");
+            });
+        }
+
+        // Метод для безопасного добавления текста в LogTextBox
+        private void LogTextBoxAppendText(string text)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                LogTextBox.AppendText(text);
             });
         }
     }
