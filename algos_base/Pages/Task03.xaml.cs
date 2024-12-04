@@ -65,7 +65,8 @@ namespace algos_base
 
             try
             {
-                // Стартуем измерение времени
+                // Сбросить и перезапустить таймер перед началом сортировки
+                _stopwatch.Restart();
                 _stopwatch.Start();
 
                 LogTextBoxAppendText($"Starting sorting using {selectedMethod}...\n");
@@ -98,8 +99,7 @@ namespace algos_base
                 // Остановка времени после завершения сортировки
                 _stopwatch.Stop();
                 Dispatcher.Invoke(() => LogTextBox.AppendText($"Sorting completed in {_stopwatch.Elapsed.TotalMilliseconds} ms.\n"));
-                Dispatcher.Invoke(() => TimeTakenTextBlock.Text = $"Время выполнения: {_stopwatch.Elapsed.TotalMilliseconds} секунд");
-                _stopwatch.Reset();
+                Dispatcher.Invoke(() => TimeTakenTextBlock.Text = $"Время выполнения: {_stopwatch.Elapsed.TotalMilliseconds} миллисекунд");
 
                 // Подсчет слов
                 await Task.Run(() => CountWords(words)); // Вызов CountWords в фоновом потоке
@@ -111,7 +111,6 @@ namespace algos_base
                 Dispatcher.Invoke(() => LogTextBox.AppendText($"Error during sorting: {ex.Message}\n"));
             }
         }
-
         private string CleanWord(string word)
         {
             // Удаляем все символы, которые не являются буквами (a-z, A-Z)
@@ -155,8 +154,6 @@ namespace algos_base
 
         private async Task RadixSort(List<string> words)
         {
-            LogTextBoxAppendText("Starting Radix Sort...\n");
-
             int maxLength = words.Max(w => w.Length);
 
             for (int digitPosition = maxLength - 1; digitPosition >= 0; digitPosition--)
@@ -190,11 +187,8 @@ namespace algos_base
                     words.AddRange(bucket);
                 }
 
-                // Безопасное обновление UI
-                Dispatcher.Invoke(() => LogTextBox.AppendText($"After processing digit position {digitPosition}, words are sorted.\n"));
             }
 
-            LogTextBoxAppendText("Radix Sort completed.\n");
         }
 
 
