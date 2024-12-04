@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\C#Projects\\algos_base\\algos_base\\algos_base.csproj": {}
+    "C:\\Users\\Maxim\\Downloads\\algos_base\\algos_base\\algos_base.csproj": {}
   },
   "projects": {
-    "D:\\C#Projects\\algos_base\\algos_base\\algos_base.csproj": {
+    "C:\\Users\\Maxim\\Downloads\\algos_base\\algos_base\\algos_base.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\C#Projects\\algos_base\\algos_base\\algos_base.csproj",
+        "projectUniqueName": "C:\\Users\\Maxim\\Downloads\\algos_base\\algos_base\\algos_base.csproj",
         "projectName": "algos_base",
-        "projectPath": "D:\\C#Projects\\algos_base\\algos_base\\algos_base.csproj",
-        "packagesPath": "C:\\Users\\Nikita\\.nuget\\packages\\",
-        "outputPath": "D:\\C#Projects\\algos_base\\algos_base\\obj\\",
+        "projectPath": "C:\\Users\\Maxim\\Downloads\\algos_base\\algos_base\\algos_base.csproj",
+        "packagesPath": "C:\\Users\\Maxim\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Maxim\\Downloads\\algos_base\\algos_base\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Nikita\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Maxim\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -60,24 +61,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.11, 8.0.11]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[8.0.11, 8.0.11]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.11, 8.0.11]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.11, 8.0.11]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
