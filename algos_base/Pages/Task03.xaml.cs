@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;  // Для измерения времени
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -40,7 +41,7 @@ namespace algos_base
             }
         }
 
-        private void OnStartSortingClick(object sender, RoutedEventArgs e)
+        private async void OnStartSortingClick(object sender, RoutedEventArgs e)
         {
             LogTextBox.AppendText("Start Sorting button clicked.\n");
 
@@ -70,52 +71,57 @@ namespace algos_base
 
                 List<string> words = new List<string>(File.ReadLines(_filePath)
                     .SelectMany(line => line.Split(new[] { ' ', '\t', '\n', '\r', '.', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries)
-                                            .Select(word => word.ToLower())));
+                                                .Select(word => word.ToLower())));
 
-                LogTextBox.AppendText($"File loaded. Number of words: {words.Count}\n");
+                // Безопасное обновление UI
+                Dispatcher.Invoke(() => LogTextBox.AppendText($"File loaded. Number of words: {words.Count}\n"));
 
                 switch (selectedMethod)
                 {
                     case "QuickSort":
-                        QuickSort(words, 0, words.Count - 1);
-                        LogTextBox.AppendText("Using QuickSort sorting method.\n");
+                        await Task.Run(() => QuickSort(words, 0, words.Count - 1)); // Вызов QuickSort в фоновом потоке
+                        Dispatcher.Invoke(() => LogTextBox.AppendText("Using QuickSort sorting method.\n"));
                         break;
 
                     case "RadixSort":
-                        RadixSort(words);
-                        LogTextBox.AppendText("Using RadixSort sorting method.\n");
+                        await Task.Run(() => RadixSort(words)); // Вызов RadixSort в фоновом потоке
+                        Dispatcher.Invoke(() => LogTextBox.AppendText("Using RadixSort sorting method.\n"));
                         break;
 
                     default:
-                        LogTextBox.AppendText("Unknown sorting method.\n");
+                        Dispatcher.Invoke(() => LogTextBox.AppendText("Unknown sorting method.\n"));
                         return;
                 }
 
                 // Остановка времени после завершения сортировки
                 _stopwatch.Stop();
-                LogTextBox.AppendText($"Sorting completed in {_stopwatch.Elapsed.TotalMilliseconds} ms.\n");
-                TimeTakenTextBlock.Text = $"Время выполнения: {_stopwatch.Elapsed.TotalMilliseconds} секунд";
-
+                Dispatcher.Invoke(() => LogTextBox.AppendText($"Sorting completed in {_stopwatch.Elapsed.TotalMilliseconds} ms.\n"));
+                Dispatcher.Invoke(() => TimeTakenTextBlock.Text = $"Время выполнения: {_stopwatch.Elapsed.TotalMilliseconds} секунд");
+                _stopwatch.Reset();
 
                 // Подсчет слов
-                CountWords(words);
+                await Task.Run(() => CountWords(words)); // Вызов CountWords в фоновом потоке
 
-                LogTextBox.AppendText("Sorting and counting completed.\n");
-
+                Dispatcher.Invoke(() => LogTextBox.AppendText("Sorting and counting completed.\n"));
             }
             catch (Exception ex)
             {
-                LogTextBox.AppendText($"Error during sorting: {ex.Message}\n");
+                Dispatcher.Invoke(() => LogTextBox.AppendText($"Error during sorting: {ex.Message}\n"));
             }
         }
-
-        private void QuickSort(List<string> words, int low, int high)
+        private List<string> LoadWordsFromFile(string filePath)
+        {
+            return new List<string>(File.ReadLines(filePath)
+                .SelectMany(line => line.Split(new[] { ' ', '\t', '\n', '\r', '.', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(word => word.ToLower())));
+        }
+        private async Task QuickSort(List<string> words, int low, int high)
         {
             if (low < high)
             {
                 int pivotIndex = Partition(words, low, high);
-                QuickSort(words, low, pivotIndex - 1);
-                QuickSort(words, pivotIndex + 1, high);
+                await Task.Run(() => QuickSort(words, low, pivotIndex - 1)); // Вызов QuickSort в фоновом потоке
+                await Task.Run(() => QuickSort(words, pivotIndex + 1, high)); // Вызов QuickSort в фоновом потоке
             }
         }
 
@@ -136,7 +142,6 @@ namespace algos_base
             Swap(words, i + 1, high);
             return i + 1;
         }
-
         private void Swap(List<string> words, int i, int j)
         {
             string temp = words[i];
@@ -144,7 +149,7 @@ namespace algos_base
             words[j] = temp;
         }
 
-        private void RadixSort(List<string> words)
+        private async Task RadixSort(List<string> words)
         {
             LogTextBox.AppendText("Starting Radix Sort...\n");
 
@@ -175,14 +180,14 @@ namespace algos_base
                     words.AddRange(bucket);
                 }
 
-                LogTextBox.AppendText($"After processing digit position {digitPosition}, words are sorted: {string.Join(", ", words)}\n");
+                // Безопасное обновление UI
+                Dispatcher.Invoke(() => LogTextBox.AppendText($"After processing digit position {digitPosition}, words are sorted.\n"));
             }
 
             LogTextBox.AppendText("Radix Sort completed.\n");
         }
 
-        // Подсчет общего количества и уникальных слов
-        private void CountWords(List<string> words)
+        private async Task CountWords(List<string> words)
         {
             Dictionary<string, int> wordCounts = new Dictionary<string, int>();
 
@@ -201,19 +206,35 @@ namespace algos_base
             int uniqueWords = wordCounts.Count;
             int totalWords = words.Count;
 
-            // Обновление интерфейса
-            TotalWordsTextBlock.Text = $"Общее количество слов: {totalWords}";
-            UniqueWordsTextBlock.Text = $"Количество уникальных слов: {uniqueWords}";
-
-            // Вывод в лог
-            LogTextBox.AppendText($"\nTotal words: {totalWords}\n");
-            LogTextBox.AppendText($"Unique words: {uniqueWords}\n");
-
-            foreach (var wordCount in wordCounts)
+            // Обновление интерфейса в UI-потоке
+            Dispatcher.Invoke(() =>
             {
-                LogTextBox.AppendText($"{wordCount.Key}: {wordCount.Value}\n");
-            }
-        }
+                TotalWordsTextBlock.Text = $"Общее количество слов: {totalWords}";
+                UniqueWordsTextBlock.Text = $"Количество уникальных слов: {uniqueWords}";
+            });
 
+            // Вывод всех слов и их количества в лог в фоновом потоке
+            await Task.Run(() =>
+            {
+                StringBuilder logOutput = new StringBuilder();
+
+                foreach (var wordCount in wordCounts)
+                {
+                    logOutput.AppendLine($"{wordCount.Key}: {wordCount.Value}");
+                }
+
+                // Обновление LogTextBox в главном потоке
+                Dispatcher.Invoke(() =>
+                {
+                    LogTextBox.AppendText(logOutput.ToString());
+                });
+            });
+
+            // Вывод в лог завершен
+            Dispatcher.Invoke(() =>
+            {
+                LogTextBox.AppendText("\nCounting words finished.\n");
+            });
+        }
     }
 }
