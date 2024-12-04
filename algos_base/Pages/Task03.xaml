@@ -20,6 +20,7 @@
             <RowDefinition Height="Auto"/> <!-- Return button -->
             <RowDefinition Height="*"/>    <!-- Log text box -->
             <RowDefinition Height="60"/>   <!-- Controls with fixed height -->
+            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -27,7 +28,6 @@
         </Grid.ColumnDefinitions>
 
         <!-- Return Button -->
-        
         <Button x:Name="PreviousPageButton" Content="&#8592;" HorizontalAlignment="Left" VerticalAlignment="Top" 
                 Width="40" Height="40" Style="{StaticResource MainButtonStyle}" 
                 Click="PreviousPageButtonClick" FontSize="20" HorizontalContentAlignment="Center" 
@@ -53,5 +53,15 @@
                         Click="OnStartSortingClick"/>
             </StackPanel>
         </Viewbox>
+
+        <!-- Results Panel -->
+        <Viewbox Grid.Row="3" Grid.ColumnSpan="2" Stretch="Uniform" Margin="5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <TextBlock x:Name="TotalWordsTextBlock" FontSize="18" Margin="10" Text="Total words: 0" VerticalAlignment="Center"/>
+                <TextBlock x:Name="UniqueWordsTextBlock" FontSize="18" Margin="10" Text="Unique words: 0" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TimeTakenTextBlock" FontSize="18" Margin="10" Text="Execution time: 0.000 seconds" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Viewbox>
+
     </Grid>
 </Page>
