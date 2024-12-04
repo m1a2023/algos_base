@@ -138,45 +138,35 @@ namespace algos_base
         {
             int n = array.Length;
 
-            // Построение кучи (перегруппировка массива)
             for (int i = n / 2 - 1; i >= 0; i--)
             {
                 await Heapify(array, n, i);
             }
 
-            // Один за другим извлекаем элементы из кучи
             for (int i = n - 1; i > 0; i--)
             {
                 if (isBackPressed) return;
                 if (isPaused) await WaitForResume();
-
-                // Перемещаем текущий корень в конец
                 Log($"Swapping: {array[0]} and {array[i]}");
                 (array[0], array[i]) = (array[i], array[0]);
                 UpdateBarPositions();
-
-                // Вызываем heapify на уменьшенной куче
                 await Heapify(array, i, 0);
                 await Delay();
             }
         }
-
         private async Task Heapify(int[] array, int n, int i)
         {
             int largest = i;
             int left = 2 * i + 1;
             int right = 2 * i + 2;
-
             if (left < n && array[left] > array[largest])
             {
                 largest = left;
             }
-
             if (right < n && array[right] > array[largest])
             {
                 largest = right;
             }
-
             if (largest != i)
             {
                 Log($"Swapping: {array[i]} and {array[largest]}");
@@ -185,6 +175,7 @@ namespace algos_base
                 await Heapify(array, n, largest);
             }
         }
+
         
         private async Task QuickSort(int[] array, int low, int high)
         {
@@ -195,41 +186,32 @@ namespace algos_base
 
                 int pivotIndex = await Partition(array, low, high);
 
-                await QuickSort(array, low, pivotIndex - 1);
+                await QuickSort(array, low, pivotIndex);
                 await QuickSort(array, pivotIndex + 1, high);
             }
         }
 
         private async Task<int> Partition(int[] array, int low, int high)
         {
-            int pivot = array[high];
+            int pivot = array[(low + high) / 2];
             Log($"Pivot: {pivot}");
-            int i = (low - 1);
+            int i = low - 1;
+            int j = high + 1;
 
-            for (int j = low; j < high; j++)
+            while (true)
             {
-                if (isBackPressed) return -1;
-                if (isPaused) await WaitForResume();
+                do { i++; } while (array[i] < pivot);
+                do { j--; } while (array[j] > pivot);
 
-                if (array[j] < pivot)
-                {
-                    i++;
-                    Log($"Swapping: {array[i]} and {array[j]}");
-                    (array[i], array[j]) = (array[j], array[i]);
-                    UpdateBarPositions();
-                }
+                if (i >= j) return j;
+
+                Log($"Swapping: {array[i]} and {array[j]}");
+                (array[i], array[j]) = (array[j], array[i]);
+                UpdateBarPositions();
 
                 await Delay();
             }
-
-            Log($"Swapping: {array[i + 1]} and {array[high]}");
-            (array[i + 1], array[high]) = (array[high], array[i + 1]);
-            UpdateBarPositions();
-
-            return i + 1;
         }
-
-
         private void DrawBars()
         {
             double barWidth = SortingCanvas.ActualWidth / numbers.Length;
@@ -271,12 +253,10 @@ namespace algos_base
             for (int i = 0; i < array.Length - 1; i++)
             {
                 if (isBackPressed) return;
-
                 if (isPaused)
                 {
                     await WaitForResume();
                 }
-
                 int minIndex = i;
                 for (int j = i + 1; j < array.Length; j++)
                 {
@@ -285,10 +265,8 @@ namespace algos_base
                     {
                         minIndex = j;
                     }
-
                     await Delay();
                 }
-
                 if (minIndex != i)
                 {
                     Log($"Swapping: {array[i]} and {array[minIndex]}");
@@ -297,7 +275,6 @@ namespace algos_base
                     UpdateBarPositions();
                     Log($"Array: {string.Join(", ", array)}");
                 }
-
                 await Delay();
             }
         }
