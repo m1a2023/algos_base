@@ -18,19 +18,11 @@ namespace algos_base
         public Task02()
         {
             InitializeComponent();
-            _delay = (int)DelaySlider.Value;
-            DelaySlider.ValueChanged += DelaySlider_ValueChanged;
         }
         private void PreviousPageButtonClick(object sender, RoutedEventArgs e)
         {
             NavigationService.GoBack();
         }
-
-        private void DelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            _delay = (int)e.NewValue;
-        }
-
         private void OnBrowseButtonClick(object sender, RoutedEventArgs e)
         {
             LogTextBox.AppendText("Browse button clicked. Opening file dialog...\n");
@@ -107,7 +99,7 @@ namespace algos_base
                 switch (selectedMethod)
                 {
                     case "Natural Merge":
-                        await DirectMergeSort(rows, keyIndex);
+                        await NaturalMergeSort(rows, keyIndex);
                         break;
                     case "Direct Merge":
                         await DirectMergeSort(rows, keyIndex);
@@ -145,48 +137,6 @@ namespace algos_base
                 LogTextBox.AppendText($"Error during sorting: {ex.Message}\n");
             }
         }
-        private async Task NaturalMergeSort(List<IXLRow> rows, int keyIndex)
-        {
-
-            bool sorted = false;
-
-            while (!sorted)
-            {
-                List<List<IXLRow>> runs = new List<List<IXLRow>>();
-                List<IXLRow> currentRun = new List<IXLRow> { rows[0] };
-
-                for (int i = 1; i < rows.Count; i++)
-                {
-                    var currentKey = rows[i].Cell(keyIndex + 1).Value.ToString();
-                    var previousKey = rows[i - 1].Cell(keyIndex + 1).Value.ToString();
-
-                    if (CompareKeys(currentKey, previousKey) >= 0)
-                    {
-                        currentRun.Add(rows[i]);
-                    }
-                    else
-                    {
-                        runs.Add(new List<IXLRow>(currentRun));
-                        currentRun.Clear();
-                        currentRun.Add(rows[i]);
-                    }
-                }
-
-                runs.Add(currentRun);
-
-                if (runs.Count == 1)
-                {
-                    sorted = true;
-                }
-                else
-                {
-                    rows = MergeRuns(runs, keyIndex);
-                    await Task.Delay(_delay);
-                }
-            }
-            
-        }
-
         private int CompareKeys(string key1, string key2)
         {
             bool isNumeric1 = double.TryParse(key1, out double num1);
@@ -201,48 +151,54 @@ namespace algos_base
                 return string.Compare(key1, key2);
             }
         }
-
-        private List<IXLRow> MergeRuns(List<List<IXLRow>> runs, int keyIndex)
+        private async Task NaturalMergeSort(List<IXLRow> rows, int keyIndex)
         {
+            List<(int start, int end)> runs = FindRuns(rows, keyIndex);
+    
             while (runs.Count > 1)
             {
-                List<IXLRow> leftRun = runs[0];
-                List<IXLRow> rightRun = runs[1];
-                List<IXLRow> mergedRun = MergeTwoRuns(leftRun, rightRun, keyIndex);
-                runs.RemoveAt(0);
-                runs.RemoveAt(0);
-                runs.Add(mergedRun);
-            }
+                List<(int start, int end)> newRuns = new List<(int start, int end)>();
 
-            return runs[0];
+                for (int i = 0; i < runs.Count; i += 2)
+                {
+                    if (i + 1 < runs.Count)
+                    {
+                        var leftRun = runs[i];
+                        var rightRun = runs[i + 1];
+
+                        MergeInto(rows, leftRun.start, rightRun.start, rightRun.end, keyIndex);
+                        await Task.Delay(_delay);
+
+                        newRuns.Add((leftRun.start, rightRun.end));
+                    }
+                    else
+                    {
+                        newRuns.Add(runs[i]);
+                    }
+                }
+                runs = newRuns;
+            }
         }
 
-        private List<IXLRow> MergeTwoRuns(List<IXLRow> left, List<IXLRow> right, int keyIndex)
+        private List<(int start, int end)> FindRuns(List<IXLRow> rows, int keyIndex)
         {
-            List<IXLRow> merged = new List<IXLRow>();
-            int i = 0, j = 0;
+            List<(int start, int end)> runs = new List<(int start, int end)>();
+            int start = 0;
 
-            while (i < left.Count && j < right.Count)
+            for (int i = 1; i < rows.Count; i++)
             {
-                string leftKey = left[i].Cell(keyIndex + 1).Value.ToString();
-                string rightKey = right[j].Cell(keyIndex + 1).Value.ToString();
+                string currentKey = rows[i].Cell(keyIndex + 1).Value.ToString();
+                string previousKey = rows[i - 1].Cell(keyIndex + 1).Value.ToString();
 
-                if (CompareKeys(leftKey, rightKey) <= 0)
+                if (CompareKeys(previousKey, currentKey) > 0)
                 {
-                    merged.Add(left[i++]);
-                }
-                else
-                {
-                    merged.Add(right[j++]);
+                    runs.Add((start, i));
+                    start = i;
                 }
             }
-
-            merged.AddRange(left.Skip(i));
-            merged.AddRange(right.Skip(j));
-
-            return merged;
+            runs.Add((start, rows.Count));
+            return runs;
         }
-
         private async Task DirectMergeSort(List<IXLRow> rows, int keyIndex)
         {
 
@@ -260,7 +216,6 @@ namespace algos_base
             }
             
         }
-
         private void MergeInto(List<IXLRow> rows, int left, int mid, int right, int keyIndex)
         {
             List<IXLRow> temp = new List<IXLRow>();
@@ -331,7 +286,6 @@ namespace algos_base
                 await Heapify(rows, n, largest, keyIndex);
             }
         }
-
     }
 }
 

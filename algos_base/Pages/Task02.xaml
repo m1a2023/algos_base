@@ -20,7 +20,6 @@
             <RowDefinition Height="*"/>    <!-- Log text box -->
             <RowDefinition Height="60"/>   <!-- Controls with fixed height -->
             <RowDefinition Height="60"/>
-            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -60,16 +59,6 @@
         </Viewbox>
         
         <Viewbox Grid.Row="3" Grid.ColumnSpan="2" Stretch="Uniform" Margin="5">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" Margin="0, 10">
-                    <Label Content="Delay (ms):" VerticalAlignment="Center" FontSize="18"/>
-                    <Slider x:Name="DelaySlider" Width="200" Minimum="0" Maximum="2000" Value="500" TickFrequency="100" IsSnapToTickEnabled="True" Margin="10,0"/>
-                    <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50" FontSize="18"/>
-                </StackPanel>
-            </StackPanel>
-        </Viewbox>
-        
-        <Viewbox Grid.Row="4" Grid.ColumnSpan="2" Stretch="Uniform" Margin="5">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                 <Button x:Name="StartButton" Content="Start Sorting" Width="150" Height="40" Margin="20,0,0,0" Style="{StaticResource MainButtonStyle}"
                         Click="OnStartSortingClick"/>
