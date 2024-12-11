@@ -20,7 +20,11 @@ namespace algos_base
         {
             InitializeComponent();
         }
-
+        private void Log(string message)
+        {
+            LogTextBox.AppendText(message);
+            LogTextBox.ScrollToEnd(); 
+        }
         private void PreviousPageButtonClick(object sender, RoutedEventArgs e)
         {
             NavigationService.GoBack();
@@ -74,35 +78,35 @@ namespace algos_base
                     .SelectMany(line => line.Split(new[] { ' ', '\t', '\n', '\r', '.', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries)
                                             .Select(word => CleanWord(word))));
 
-                Dispatcher.Invoke(() => LogTextBox.AppendText($"File loaded. Number of words: {words.Count}\n"));
+                Dispatcher.Invoke(() => Log($"File loaded. Number of words: {words.Count}\n"));
 
                 switch (selectedMethod)
                 {
                     case "QuickSort":
                         await Task.Run(() => QuickSort(words, 0, words.Count - 1));
-                        Dispatcher.Invoke(() => LogTextBox.AppendText("Using QuickSort sorting method.\n"));
+                        Dispatcher.Invoke(() => Log("Using QuickSort sorting method.\n"));
                         break;
 
                     case "RadixSort":
                         await Task.Run(() => RadixSort(words));
-                        Dispatcher.Invoke(() => LogTextBox.AppendText("Using RadixSort sorting method.\n"));
+                        Dispatcher.Invoke(() => Log("Using RadixSort sorting method.\n"));
                         break;
 
                     default:
-                        Dispatcher.Invoke(() => LogTextBox.AppendText("Unknown sorting method.\n"));
+                        Dispatcher.Invoke(() => Log("Unknown sorting method.\n"));
                         return;
                 }
 
                 _stopwatch.Stop();
-                Dispatcher.Invoke(() => LogTextBox.AppendText($"Sorting completed in {_stopwatch.Elapsed.TotalMilliseconds} ms.\n"));
+                Dispatcher.Invoke(() => Log($"Sorting completed in {_stopwatch.Elapsed.TotalMilliseconds} ms.\n"));
                 Dispatcher.Invoke(() => TimeTakenTextBlock.Text = $"Время выполнения: {_stopwatch.Elapsed.TotalMilliseconds} миллисекунд");
                 await Task.Run(() => CountWords(words));
 
-                Dispatcher.Invoke(() => LogTextBox.AppendText("Sorting and counting completed.\n"));
+                Dispatcher.Invoke(() => Log("Sorting and counting completed.\n"));
             }
             catch (Exception ex)
             {
-                Dispatcher.Invoke(() => LogTextBox.AppendText($"Error during sorting: {ex.Message}\n"));
+                Dispatcher.Invoke(() => Log($"Error during sorting: {ex.Message}\n"));
             }
         }
         private string CleanWord(string word)
@@ -214,19 +218,19 @@ namespace algos_base
                 }
                 Dispatcher.Invoke(() =>
                 {
-                    LogTextBox.AppendText(logOutput.ToString());
+                    Log(logOutput.ToString());
                 });
             });
             Dispatcher.Invoke(() =>
             {
-                LogTextBox.AppendText("\nCounting words finished.\n");
+                Log("\nCounting words finished.\n");
             });
         }
         private void LogTextBoxAppendText(string text)
         {
             Dispatcher.Invoke(() =>
             {
-                LogTextBox.AppendText(text);
+                Log(text);
             });
         }
     }

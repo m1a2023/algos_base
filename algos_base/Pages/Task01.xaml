@@ -17,57 +17,79 @@
     </Page.Resources>
 
     <Grid Margin="10">
-        
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="6*"/>
+            <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
+
+        <Button x:Name="PreviousPageButton" Content="&#8592;" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                Width="40" Height="40" Margin="5" Style="{StaticResource MainButtonStyle}" 
+                Click="PreviousPageButtonClick" FontSize="20" HorizontalContentAlignment="Center" 
+                VerticalContentAlignment="Center"/>
         
         <Viewbox Grid.Column="0" Stretch="Uniform">
-            <StackPanel Orientation="Vertical">
-            <Button x:Name="PreviousPageButton" Content="&#8592;" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                    Width="40" Height="40" Margin="5" Style="{StaticResource MainButtonStyle}" 
-                    Click="PreviousPageButtonClick" FontSize="20" HorizontalContentAlignment="Center" 
-                    VerticalContentAlignment="Center"/>
-            <Canvas x:Name="SortingCanvas" Background="LightGray" Width="600" Height="400" />
-            </StackPanel>
+                <Canvas x:Name="SortingCanvas" Background="LightGray" Width="600" Height="400" />
         </Viewbox>
-        
+
         <Viewbox Grid.Column="1" Stretch="Uniform" Margin="10">
             <StackPanel Orientation="Vertical">
-                
-                <TextBox x:Name="CountTextBox" Width="250" Height="70" Margin="10" FontSize="18"
-                         Text="Elements amount" TextAlignment="Center" VerticalContentAlignment="Center"
-                         GotFocus="CountTextBox_GotFocus" LostFocus="CountTextBox_LostFocus"/>
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                <Button x:Name="SelectionSortButton" Content="Selection Sort" 
-                        Style="{StaticResource MainButtonStyle}" Click="OnSelectionSortClick"/>
-                        
-                <Button x:Name="InsertionSortButton" Content="Insertion Sort" 
-                        Style="{StaticResource MainButtonStyle}" Click="OnInsertionSortClick"/>
-                        
-                <Button x:Name="HeapSortButton" Content="Heap Sort" 
-                        Style="{StaticResource MainButtonStyle}" Click="OnHeapSortClick"/>
-                        
-                <Button x:Name="QuickSortButton" Content="Quick Sort" 
-                        Style="{StaticResource MainButtonStyle}" Click="OnQuickSortClick"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <Button x:Name="PauseButton" Content="Pause" 
-                        Style="{StaticResource MainButtonStyle}" Click="OnPauseButtonClick" IsEnabled="False"/>
+                    <TextBox Grid.Row="0" Grid.Column="0" x:Name="CountTextBox" Width="250" Height="70" Margin="10" FontSize="18"
+                             Text="Elements amount" TextAlignment="Center" VerticalContentAlignment="Center"
+                             GotFocus="CountTextBox_GotFocus" LostFocus="CountTextBox_LostFocus"/>
 
-                <StackPanel Orientation="Horizontal" Margin="10">
-                    <Label Content="Delay (ms):" VerticalAlignment="Center" FontSize="18" Margin="0, 0, 10, 0"/>
-                    <Slider x:Name="DelaySlider" Minimum="1" Maximum="1000" Value="500" Width="200" Margin="10,0"/>
-                    <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50" FontSize="18"/>
-                </StackPanel>
+                    <Button x:Name="SelectionSortButton" Content="Selection Sort"
+                            Grid.Row="1" Grid.Column="0"
+                            Style="{StaticResource MainButtonStyle}" Click="OnSelectionSortClick"/>
 
-                <ListBox x:Name="LogListBox" Height="150" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="10">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" TextWrapping="Wrap" MaxWidth="300" FontSize="18"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                    <Button x:Name="InsertionSortButton" Content="Insertion Sort"
+                            Grid.Row="1" Grid.Column="1"
+                            Style="{StaticResource MainButtonStyle}" Click="OnInsertionSortClick"/>
+
+                    <Button x:Name="HeapSortButton" Content="Heap Sort"
+                            Grid.Row="2" Grid.Column="0"
+                            Style="{StaticResource MainButtonStyle}" Click="OnHeapSortClick"/>
+
+                    <Button x:Name="QuickSortButton" Content="Quick Sort"
+                            Grid.Row="2" Grid.Column="1"
+                            Style="{StaticResource MainButtonStyle}" Click="OnQuickSortClick"/>
+
+                    <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                Orientation="Horizontal" Margin="10">
+                        <Label Content="Delay (ms):" VerticalAlignment="Center" FontSize="18" Margin="0, 0, 10, 0"/>
+                        <Slider x:Name="DelaySlider" Minimum="1" Maximum="1000" Value="500" Width="200" Margin="10,0"/>
+                        <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50" FontSize="18"/>
+                    </StackPanel>
+
+                    <Button x:Name="PauseButton" Content="Pause" Grid.Row="0" Grid.Column="1" 
+                            Style="{StaticResource MainButtonStyle}" Click="OnPauseButtonClick" IsEnabled="False"/>
+                </Grid>
+
+                <TextBox x:Name="LogTextBox" 
+                         Height="300" 
+                         Width="600"
+                         MaxWidth="600"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                         HorizontalAlignment="Stretch" 
+                         VerticalAlignment="Stretch" 
+                         Margin="10" 
+                         IsReadOnly="True" 
+                         VerticalScrollBarVisibility="Auto" 
+                         AcceptsReturn="True" 
+                         FontSize="18" 
+                         TextWrapping="Wrap"/>
             </StackPanel>
         </Viewbox>
     </Grid>

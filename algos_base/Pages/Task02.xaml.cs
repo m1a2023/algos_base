@@ -23,21 +23,26 @@ namespace algos_base
         {
             NavigationService.GoBack();
         }
+        
+        private void Log(string message)
+        {
+            LogTextBox.AppendText(message);
+        }
         private void OnBrowseButtonClick(object sender, RoutedEventArgs e)
         {
-            LogTextBox.AppendText("Browse button clicked. Opening file dialog...\n");
+            Log("Browse button clicked. Opening file dialog...\n");
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Excel Files (*.xlsx)|*.xlsx";
             if (openFileDialog.ShowDialog() == true)
             {
                 _filePath = openFileDialog.FileName;
-                LogTextBox.AppendText($"File selected: {_filePath}\n");
+                Log($"File selected: {_filePath}\n");
                 LoadColumnsFromFile(_filePath);
             }
             else
             {
-                LogTextBox.AppendText("No file selected.\n");
+                Log("No file selected.\n");
             }
         }
         private void LoadColumnsFromFile(string filePath)
@@ -50,21 +55,21 @@ namespace algos_base
                 KeyAttributeComboBox.ItemsSource = header;
                 KeyAttributeComboBox.SelectedIndex = 0;
 
-                LogTextBox.AppendText("Columns loaded into ComboBox.\n");
+                Log("Columns loaded into ComboBox.\n");
             }
             catch (Exception ex)
             {
-                LogTextBox.AppendText($"Error loading columns: {ex.Message}\n");
+                Log($"Error loading columns: {ex.Message}\n");
             }
         }
         private async void OnStartSortingClick(object sender, RoutedEventArgs e)
         {
-            LogTextBox.AppendText("Start Sorting button clicked.\n");
+            Log("Start Sorting button clicked.\n");
 
             if (string.IsNullOrEmpty(_filePath))
             {
                 MessageBox.Show("Please select a file first.");
-                LogTextBox.AppendText("Error: No file selected.\n");
+                Log("Error: No file selected.\n");
                 return;
             }
 
@@ -74,7 +79,7 @@ namespace algos_base
             if (string.IsNullOrEmpty(selectedMethod) || string.IsNullOrEmpty(keyAttribute))
             {
                 MessageBox.Show("Please select sorting method and key attribute.");
-                LogTextBox.AppendText("Error: Sorting method or key attribute is not selected.\n");
+                Log("Error: Sorting method or key attribute is not selected.\n");
                 return;
             }
 
@@ -90,12 +95,12 @@ namespace algos_base
                 if (keyIndex == -1)
                 {
                     MessageBox.Show("Key attribute not found in header.");
-                    LogTextBox.AppendText("Error: Key attribute not found in header.\n");
+                    Log("Error: Key attribute not found in header.\n");
                     return;
                 }
 
-                LogTextBox.AppendText($"Sorting method selected: {selectedMethod}\n");
-                LogTextBox.AppendText($"Key attribute: {keyAttribute}\n");
+                Log($"Sorting method selected: {selectedMethod}\n");
+                Log($"Key attribute: {keyAttribute}\n");
                 switch (selectedMethod)
                 {
                     case "Natural Merge":
@@ -108,7 +113,7 @@ namespace algos_base
                         await HeapSort(rows, keyIndex);
                         break;
                     default:
-                        LogTextBox.AppendText("Error: Unsupported sorting method.\n");
+                        Log("Error: Unsupported sorting method.\n");
                         return;
                 }
                 
@@ -129,12 +134,12 @@ namespace algos_base
                 }
 
                 newWorkbook.SaveAs(sortedFilePath);
-                LogTextBox.AppendText($"Sorted file saved at {sortedFilePath}\n");
+                Log($"Sorted file saved at {sortedFilePath}\n");
 
             }
             catch (Exception ex)
             {
-                LogTextBox.AppendText($"Error during sorting: {ex.Message}\n");
+                Log($"Error during sorting: {ex.Message}\n");
             }
         }
         private int CompareKeys(string key1, string key2)

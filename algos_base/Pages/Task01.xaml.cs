@@ -68,7 +68,7 @@ namespace algos_base
             
             DrawBars();
 
-            LogListBox.Items.Clear();
+            LogTextBox.Clear();
             
             SetButtonsEnabled(false);
 
@@ -95,7 +95,7 @@ namespace algos_base
             
             DrawBars();
 
-            LogListBox.Items.Clear();
+            LogTextBox.Clear();
             
             SetButtonsEnabled(false);
 
@@ -122,7 +122,7 @@ namespace algos_base
     
             DrawBars();
 
-            LogListBox.Items.Clear();
+            LogTextBox.Clear();
     
             SetButtonsEnabled(false);
 
@@ -149,7 +149,7 @@ namespace algos_base
     
             DrawBars();
 
-            LogListBox.Items.Clear();
+            LogTextBox.Clear();
     
             SetButtonsEnabled(false);
 
@@ -498,7 +498,8 @@ namespace algos_base
 
         private void Log(string message)
         {
-            LogListBox.Items.Insert(0, message);
+            LogTextBox.AppendText(message+"\n");
+            LogTextBox.ScrollToEnd(); 
         }
 
         private async Task WaitForResume()
