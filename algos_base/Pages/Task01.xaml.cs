@@ -169,77 +169,55 @@ namespace algos_base
         private async Task HeapSort(int[] array)
         {
             int n = array.Length;
-
-            // Построение кучи (rearrange array)
             for (int i = n / 2 - 1; i >= 0; i--)
             {
+                Log($"Heapifying at index {i}");
                 await Heapify(array, n, i);
             }
 
-            // Один за другим извлекаем элементы из кучи
             for (int i = n - 1; i > 0; i--)
             {
                 if (isBackPressed) return;
                 if (isPaused) await WaitForResume();
-
-                // Окрашиваем элементы, которые меняются местами, в красный
+                
+                Log($"Swapping root {array[0]} with element {array[i]} at index {i}");
                 rectangles[0].Fill = Brushes.Red;
                 rectangles[i].Fill = Brushes.Red;
-
-                // Обмен значениями
                 (array[0], array[i]) = (array[i], array[0]);
                 UpdateBarPositions();
 
+                Log($"Array: {string.Join(", ", array)}");
                 await Delay();
-
-                // После обмена возвращаем элементы в синий цвет
                 rectangles[0].Fill = Brushes.Blue;
-                rectangles[i].Fill = Brushes.Green; // Элемент отсортирован
-
-                // Восстанавливаем кучу для оставшихся элементов
+                rectangles[i].Fill = Brushes.Green;
                 await Heapify(array, i, 0);
             }
-
-            // Окрашиваем последний элемент в зеленый
             rectangles[0].Fill = Brushes.Green;
         }
 
         private async Task Heapify(int[] array, int n, int i)
         {
-            int largest = i; // Инициализируем наибольший элемент как корень
-            int left = 2 * i + 1; // левый = 2*i + 1
-            int right = 2 * i + 2; // правый = 2*i + 2
-
-            // Если левый дочерний больше корня
+            int largest = i;
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;
             if (left < n && array[left] > array[largest])
             {
                 largest = left;
             }
-
-            // Если правый дочерний больше, чем наибольший элемент
             if (right < n && array[right] > array[largest])
             {
                 largest = right;
             }
-
-            // Если наибольший элемент не корень
             if (largest != i)
             {
-                // Окрашиваем элементы, которые меняются местами, в красный
                 rectangles[i].Fill = Brushes.Red;
                 rectangles[largest].Fill = Brushes.Red;
-
-                // Обмен значениями
                 (array[i], array[largest]) = (array[largest], array[i]);
                 UpdateBarPositions();
 
                 await Delay();
-
-                // После обмена возвращаем элементы в синий
                 rectangles[i].Fill = Brushes.Blue;
                 rectangles[largest].Fill = Brushes.Blue;
-
-                // Рекурсивно восстанавливаем кучу
                 await Heapify(array, n, largest);
             }
         }
@@ -250,18 +228,15 @@ namespace algos_base
 
             if (low < high)
             {
+                Log($"QuickSort called on range [{low}, {high}]");
                 int pivotIndex = await Partition(array, low, high);
-
-                // Рекурсивно сортируем элементы до и после разделителя
+                Log($"Pivot element {array[pivotIndex]} placed at index {pivotIndex}");
                 await QuickSort(array, low, pivotIndex - 1);
                 await QuickSort(array, pivotIndex + 1, high);
-
-                // Окрашиваем элемент, находящийся в позиции pivot, в зеленый (отсортирован)
                 rectangles[pivotIndex].Fill = Brushes.Green;
             }
             else if (low == high)
             {
-                // Когда один элемент остался на месте, его можно считать отсортированным
                 rectangles[low].Fill = Brushes.Green;
             }
         }
@@ -269,7 +244,7 @@ namespace algos_base
         private async Task<int> Partition(int[] array, int low, int high)
         {
             int pivot = array[high];
-            rectangles[high].Fill = Brushes.Yellow; // Окрашиваем опорный элемент
+            rectangles[high].Fill = Brushes.Yellow;
             await Delay();
 
             int i = low - 1;
@@ -278,45 +253,39 @@ namespace algos_base
             {
                 if (isBackPressed) return i;
                 if (isPaused) await WaitForResume();
-
-                // Окрашиваем текущий элемент, который сравнивается, в желтый
                 rectangles[j].Fill = Brushes.Yellow;
                 await Delay();
+                Log($"Comparing element {array[j]} with pivot {pivot}");
+
 
                 if (array[j] < pivot)
                 {
                     i++;
+                    Log($"Swapping element {array[i]} at index {i} with {array[j]} at index {j}");
                     Swap(array, i, j);
                     UpdateBarPositions();
                     await Delay();
-
-                    // Окрашиваем обработанный элемент в синий, если он не является опорным
                     rectangles[i].Fill = Brushes.Blue;
                 }
-
-                // Возвращаем цвет текущего элемента обратно
                 rectangles[j].Fill = Brushes.Blue;
             }
 
-            // Меняем местами опорный элемент с элементом в позиции (i+1)
+            Log($"Swapping pivot {array[high]} with element {array[i + 1]} at index {i + 1}");
             Swap(array, i + 1, high);
             UpdateBarPositions();
             await Delay();
-
-            // Возвращаем цвет опорного элемента после сортировки
             rectangles[high].Fill = Brushes.Blue;
+            Log($"Array: {string.Join(", ", array)}");
+
 
             return i + 1;
         }
 
         private async Task Swap(int[] array, int i, int j)
         {
-            // Меняем элементы в массиве
             int temp = array[i];
             array[i] = array[j];
             array[j] = temp;
-
-            // Обновляем визуальные блоки (прямоугольники) в интерфейсе
             double tempHeight = rectangles[i].Height;
             rectangles[i].Height = rectangles[j].Height;
             rectangles[j].Height = tempHeight;
@@ -324,29 +293,22 @@ namespace algos_base
             double tempTop = Canvas.GetTop(rectangles[i]);
             Canvas.SetTop(rectangles[i], Canvas.GetTop(rectangles[j]));
             Canvas.SetTop(rectangles[j], tempTop);
-
-            // Добавляем задержку, чтобы обновления визуализации успели отобразиться
-            await Task.Delay(100); // Adjust the delay as needed
+            await Task.Delay(100);
         }
 
         private void DrawBars()
         {
             double barWidth = SortingCanvas.ActualWidth / numbers.Length;
             double canvasHeight = SortingCanvas.ActualHeight;
-
-            // Ограничиваем минимальную ширину бара, чтобы избежать ошибок
-            double minBarWidth = 5; // минимальная ширина бара
-            barWidth = Math.Max(barWidth, minBarWidth); // Применяем минимальную ширину
+            double minBarWidth = 5;
+            barWidth = Math.Max(barWidth, minBarWidth);
 
             for (int i = 0; i < numbers.Length; i++)
             {
-                // Adjust the initial bar height relative to the canvas height
                 double barHeight = numbers[i] * (canvasHeight / 100);
-        
-                // Проверяем, что ширина и высота бара валидны
                 if (barWidth <= 0 || barHeight <= 0)
                 {
-                    continue; // Пропускаем такие элементы
+                    continue;
                 }
 
                 var rect = new Rectangle
@@ -369,65 +331,43 @@ namespace algos_base
             {
                 if (isBackPressed) return;
                 if (isPaused) await WaitForResume();
-
                 int minIndex = i;
-
-                // Окрашиваем текущий элемент в желтый (он будет сравниваться)
                 rectangles[i].Fill = Brushes.Yellow;
 
                 for (int j = i + 1; j < array.Length; j++)
                 {
                     Log($"Comparing: {array[j]} and {array[minIndex]}");
-
-                    // Окрашиваем текущий элемент для сравнения в желтый
                     rectangles[j].Fill = Brushes.Yellow;
-
-                    // Если новый элемент меньше, меняем минимальный индекс
                     if (array[j] < array[minIndex])
                     {
-                        // Сбрасываем старый минимальный элемент в синий
                         rectangles[minIndex].Fill = Brushes.Blue;
                         minIndex = j;
-
-                        // Окрашиваем новый минимальный элемент в желтый
                         rectangles[minIndex].Fill = Brushes.Yellow;
                     }
                     else
                     {
-                        // Если элементы не обменялись, возвращаем их в синий
                         rectangles[j].Fill = Brushes.Blue;
                     }
-
-                    // Задержка для визуализации
                     await Delay();
                 }
-
-                // Если минимальный элемент поменялся, меняем их местами
+                
                 if (minIndex != i)
                 {
                     Log($"Swapping: {array[i]} and {array[minIndex]}");
-
-                    // Окрашиваем элементы, которые меняются местами, в красный
                     rectangles[i].Fill = Brushes.Red;
                     rectangles[minIndex].Fill = Brushes.Red;
-
-                    // Обмен значениями в массиве
+                    
                     (array[i], array[minIndex]) = (array[minIndex], array[i]);
                     UpdateBarPositions();
 
                     Log($"Array: {string.Join(", ", array)}");
 
-                    await Delay(); // Задержка для визуализации обмена
-
-                    // После обмена возвращаем элементы в синий цвет
+                    await Delay();
                     rectangles[i].Fill = Brushes.Blue;
                     rectangles[minIndex].Fill = Brushes.Blue;
                 }
-
-                // Окрашиваем отсортированный элемент в зеленый
+                
                 rectangles[i].Fill = Brushes.Green;
-
-                // Убираем жёлтую окраску с минимального элемента (если обмен был)
                 if (minIndex != i)
                 {
                     rectangles[minIndex].Fill = Brushes.Blue;
@@ -435,8 +375,6 @@ namespace algos_base
 
                 await Delay();
             }
-
-            // Окрашиваем последний элемент в зеленый
             rectangles[array.Length - 1].Fill = Brushes.Green;
         }
 
@@ -449,40 +387,42 @@ namespace algos_base
 
                 int key = array[i];
                 int j = i - 1;
-
-                // Окрашиваем текущий элемент (который вставляется) в желтый
+                
                 rectangles[i].Fill = Brushes.Yellow;
                 await Delay();
 
                 while (j >= 0 && array[j] > key)
                 {
-                    // Окрашиваем сравниваемый элемент в желтый
+                    Log($"Comparing: {array[j]} and {key}");
+                    
                     rectangles[j].Fill = Brushes.Yellow;
-
-                    // Сдвиг элементов вправо
+                    
                     array[j + 1] = array[j];
                     UpdateBarPositions();
+                    
+                    Log($"Array: {string.Join(", ", array)}");
+                    
                     await Delay();
-
-                    // Возвращаем цвет обратно в синий для обработанного элемента
+                    
                     rectangles[j].Fill = Brushes.Blue;
 
                     j--;
                 }
-
-                // Вставляем элемент на правильное место
+                
                 array[j + 1] = key;
+                Log($"Inserted {key} at position {j + 1}");
+                
                 UpdateBarPositions();
-
-                // Окрашиваем вставленный элемент в красный
+                
+                Log($"Array: {string.Join(", ", array)}");
+                
                 rectangles[j + 1].Fill = Brushes.Red;
+                
                 await Delay();
-
-                // Возвращаем цвет вставленного элемента в зеленый (отсортирован)
+                
                 rectangles[j + 1].Fill = Brushes.Green;
             }
-
-            // Окрашиваем все элементы в зеленый, когда сортировка завершена
+            
             for (int i = 0; i < array.Length; i++)
             {
                 rectangles[i].Fill = Brushes.Green;
@@ -490,7 +430,6 @@ namespace algos_base
         }
         private void UpdateBarPositions()
         {
-            // Убедитесь, что длина массива numbers и rectangles совпадает
             if (rectangles == null || rectangles.Length != numbers.Length)
             {
                 return;
@@ -498,25 +437,15 @@ namespace algos_base
 
             for (int i = 0; i < numbers.Length; i++) 
             {
-                // Если массив numbers пуст, пропустите итерацию
                 if (numbers.Length == 0) return;
-
-                // Получаем высоту баров, пропорциональную величине числа
                 double barHeight = numbers[i] * (SortingCanvas.ActualHeight / 100);
 
-                // Если прямоугольник не был инициализирован, пропустите его
                 if (rectangles[i] == null)
                 {
                     continue;
                 }
-
-                // Обновляем высоту прямоугольника
                 rectangles[i].Height = barHeight;
-        
-                // Устанавливаем позицию прямоугольника по оси X (горизонтальное расположение)
                 Canvas.SetLeft(rectangles[i], i * (SortingCanvas.ActualWidth / numbers.Length));
-
-                // Устанавливаем позицию по оси Y (вертикальное расположение, начиная с низа)
                 Canvas.SetBottom(rectangles[i], 0);
             }
         }
@@ -535,8 +464,7 @@ namespace algos_base
             try
             {
                 int n = int.Parse(input);
-
-                // Check if the value exceeds 1000
+                
                 if (n > 1000)
                 {
                     MessageBox.Show("The number of elements cannot exceed 1000.", "Error");

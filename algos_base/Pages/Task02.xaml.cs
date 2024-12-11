@@ -5,305 +5,333 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using ClosedXML.Excel;
 using Microsoft.Win32;
 
 namespace algos_base
 {
-        public partial class Task02 : Page
+    public partial class Task02 : Page
+    {
+        private string _filePath;
+        private int _delay;
+
+        public Task02()
         {
-            private string _filePath;
-            private int _delay;
+            InitializeComponent();
+            _delay = (int)DelaySlider.Value;
+            DelaySlider.ValueChanged += DelaySlider_ValueChanged;
+        }
+        private void PreviousPageButtonClick(object sender, RoutedEventArgs e)
+        {
+            NavigationService.GoBack();
+        }
 
-            public Task02()
+        private void DelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            _delay = (int)e.NewValue;
+        }
+
+        private void OnBrowseButtonClick(object sender, RoutedEventArgs e)
+        {
+            LogTextBox.AppendText("Browse button clicked. Opening file dialog...\n");
+
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel Files (*.xlsx)|*.xlsx";
+            if (openFileDialog.ShowDialog() == true)
             {
-                InitializeComponent();
-                _delay = (int)DelaySlider.Value;
-                DelaySlider.ValueChanged += DelaySlider_ValueChanged;
+                _filePath = openFileDialog.FileName;
+                LogTextBox.AppendText($"File selected: {_filePath}\n");
+                LoadColumnsFromFile(_filePath);
+            }
+            else
+            {
+                LogTextBox.AppendText("No file selected.\n");
+            }
+        }
+        private void LoadColumnsFromFile(string filePath)
+        {
+            try
+            {
+                var workbook = new XLWorkbook(filePath);
+                var worksheet = workbook.Worksheet(1);
+                var header = worksheet.Row(1).Cells().Select(c => c.Value.ToString()).ToList();
+                KeyAttributeComboBox.ItemsSource = header;
+                KeyAttributeComboBox.SelectedIndex = 0;
+
+                LogTextBox.AppendText("Columns loaded into ComboBox.\n");
+            }
+            catch (Exception ex)
+            {
+                LogTextBox.AppendText($"Error loading columns: {ex.Message}\n");
+            }
+        }
+        private async void OnStartSortingClick(object sender, RoutedEventArgs e)
+        {
+            LogTextBox.AppendText("Start Sorting button clicked.\n");
+
+            if (string.IsNullOrEmpty(_filePath))
+            {
+                MessageBox.Show("Please select a file first.");
+                LogTextBox.AppendText("Error: No file selected.\n");
+                return;
             }
 
-            private void DelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+            string selectedMethod = ((ComboBoxItem)SortingMethodComboBox.SelectedItem)?.Content?.ToString();
+            string keyAttribute = KeyAttributeComboBox.SelectedItem?.ToString();
+
+            if (string.IsNullOrEmpty(selectedMethod) || string.IsNullOrEmpty(keyAttribute))
             {
-                _delay = (int)e.NewValue;
+                MessageBox.Show("Please select sorting method and key attribute.");
+                LogTextBox.AppendText("Error: Sorting method or key attribute is not selected.\n");
+                return;
             }
 
-            private void OnBrowseButtonClick(object sender, RoutedEventArgs e)
+            try
             {
-                LogTextBox.AppendText("Browse button clicked. Opening file dialog...\n");
+                var workbook = new XLWorkbook(_filePath);
+                var worksheet = workbook.Worksheet(1);
+                var rows = worksheet.RowsUsed().Skip(1).ToList();
 
-                OpenFileDialog openFileDialog = new OpenFileDialog();
-                if (openFileDialog.ShowDialog() == true)
-                {
-                    _filePath = openFileDialog.FileName;
-                    LogTextBox.AppendText($"File selected: {_filePath}\n");
-                }
-                else
-                {
-                    LogTextBox.AppendText("No file selected.\n");
-                }
-            }
+                var header = worksheet.Row(1).Cells().Select(c => c.Value.ToString()).ToList();
+                int keyIndex = header.IndexOf(keyAttribute);
 
-            private async void OnStartSortingClick(object sender, RoutedEventArgs e)
-            {
-                LogTextBox.AppendText("Start Sorting button clicked.\n");
-
-                if (string.IsNullOrEmpty(_filePath))
+                if (keyIndex == -1)
                 {
-                    MessageBox.Show("Please select a file first.");
-                    LogTextBox.AppendText("Error: No file selected.\n");
+                    MessageBox.Show("Key attribute not found in header.");
+                    LogTextBox.AppendText("Error: Key attribute not found in header.\n");
                     return;
                 }
 
-                string selectedMethod = ((ComboBoxItem)SortingMethodComboBox.SelectedItem)?.Content?.ToString();
-                string keyAttribute = KeyAttributeTextBox.Text;
-
-                if (string.IsNullOrEmpty(selectedMethod) || string.IsNullOrEmpty(keyAttribute))
+                LogTextBox.AppendText($"Sorting method selected: {selectedMethod}\n");
+                LogTextBox.AppendText($"Key attribute: {keyAttribute}\n");
+                switch (selectedMethod)
                 {
-                    MessageBox.Show("Please select sorting method and key attribute.");
-                    LogTextBox.AppendText("Error: Sorting method or key attribute is not selected.\n");
-                    return;
-                }
-
-                try
-                {
-                    var lines = File.ReadAllLines(_filePath).ToList();
-                    var header = lines.First();
-                    lines = lines.Skip(1).ToList();
-
-                    var columns = header.Split(',');
-                    int keyIndex = Array.IndexOf(columns, keyAttribute);
-
-                    if (keyIndex == -1)
-                    {
-                        MessageBox.Show("Key attribute not found in header.");
-                        LogTextBox.AppendText("Error: Key attribute not found in header.\n");
+                    case "Natural Merge":
+                        await DirectMergeSort(rows, keyIndex);
+                        break;
+                    case "Direct Merge":
+                        await DirectMergeSort(rows, keyIndex);
+                        break;
+                    case "Heap Sort":
+                        await HeapSort(rows, keyIndex);
+                        break;
+                    default:
+                        LogTextBox.AppendText("Error: Unsupported sorting method.\n");
                         return;
-                    }
-
-                    LogTextBox.AppendText($"Sorting method selected: {selectedMethod}\n");
-                    LogTextBox.AppendText($"Key attribute: {keyAttribute}\n");
-
-                    switch (selectedMethod)
-                    {
-                        case "Natural Merge":
-                            await NaturalMergeSort(lines, keyIndex);
-                            break;
-                        case "Direct Merge":
-                            await DirectMergeSort(lines, keyIndex);
-                            break;
-                        case "Heap Sort":
-                            await HeapSort(lines, keyIndex);
-                            break;
-                        default:
-                            LogTextBox.AppendText("Error: Unsupported sorting method.\n");
-                            return;
-                    }
-
-                    lines.Insert(0, header); // Add header back to the sorted data
-                    string sortedFilePath = Path.Combine(Path.GetDirectoryName(_filePath), "sorted_" + Path.GetFileName(_filePath));
-                    File.WriteAllLines(sortedFilePath, lines);
-                    LogTextBox.AppendText($"Sorted file saved at {sortedFilePath}\n");
                 }
-                catch (Exception ex)
+                
+                var sortedFilePath = Path.Combine(Path.GetDirectoryName(_filePath), "sorted_" + Path.GetFileName(_filePath));
+                var newWorkbook = new XLWorkbook();
+                var newWorksheet = newWorkbook.Worksheets.Add("SortedData");
+                for (int i = 0; i < header.Count; i++)
                 {
-                    LogTextBox.AppendText($"Error during sorting: {ex.Message}\n");
+                    newWorksheet.Cell(1, i + 1).Value = header[i];
                 }
+                for (int rowIdx = 0; rowIdx < rows.Count; rowIdx++)
+                {
+                    var row = rows[rowIdx];
+                    for (int colIdx = 0; colIdx < row.Cells().Count(); colIdx++)
+                    {
+                        newWorksheet.Cell(rowIdx + 2, colIdx + 1).Value = row.Cell(colIdx + 1).Value;
+                    }
+                }
+
+                newWorkbook.SaveAs(sortedFilePath);
+                LogTextBox.AppendText($"Sorted file saved at {sortedFilePath}\n");
+
             }
-
-            private async Task NaturalMergeSort(List<string> lines, int keyIndex)
+            catch (Exception ex)
             {
-                LogTextBox.AppendText("Natural Merge Sort started...\n");
+                LogTextBox.AppendText($"Error during sorting: {ex.Message}\n");
+            }
+        }
+        private async Task NaturalMergeSort(List<IXLRow> rows, int keyIndex)
+        {
 
-                bool sorted = false;
+            bool sorted = false;
 
-                while (!sorted)
+            while (!sorted)
+            {
+                List<List<IXLRow>> runs = new List<List<IXLRow>>();
+                List<IXLRow> currentRun = new List<IXLRow> { rows[0] };
+
+                for (int i = 1; i < rows.Count; i++)
                 {
-                    List<List<string>> runs = new List<List<string>>();
-                    List<string> currentRun = new List<string> { lines[0] };
+                    var currentKey = rows[i].Cell(keyIndex + 1).Value.ToString();
+                    var previousKey = rows[i - 1].Cell(keyIndex + 1).Value.ToString();
 
-                    for (int i = 1; i < lines.Count; i++)
+                    if (CompareKeys(currentKey, previousKey) >= 0)
                     {
-                        var currentKey = lines[i].Split(',')[keyIndex];
-                        var previousKey = lines[i - 1].Split(',')[keyIndex];
-
-                        if (CompareKeys(currentKey, previousKey) >= 0)
-                        {
-                            currentRun.Add(lines[i]);
-                        }
-                        else
-                        {
-                            runs.Add(new List<string>(currentRun));
-                            currentRun.Clear();
-                            currentRun.Add(lines[i]);
-                        }
-                    }
-
-                    runs.Add(currentRun);
-
-                    if (runs.Count == 1)
-                    {
-                        sorted = true;
+                        currentRun.Add(rows[i]);
                     }
                     else
                     {
-                        lines = MergeRuns(runs, keyIndex);
-                        await Task.Delay(_delay);
+                        runs.Add(new List<IXLRow>(currentRun));
+                        currentRun.Clear();
+                        currentRun.Add(rows[i]);
                     }
                 }
 
-                LogTextBox.AppendText("Natural Merge Sort completed.\n");
-            }
+                runs.Add(currentRun);
 
-            private int CompareKeys(string key1, string key2)
-            {
-                bool isNumeric1 = double.TryParse(key1, out double num1);
-                bool isNumeric2 = double.TryParse(key2, out double num2);
-
-                if (isNumeric1 && isNumeric2)
+                if (runs.Count == 1)
                 {
-                    return num1.CompareTo(num2);
+                    sorted = true;
                 }
                 else
                 {
-                    return string.Compare(key1, key2);
-                }
-            }
-
-            private List<string> MergeRuns(List<List<string>> runs, int keyIndex)
-            {
-                while (runs.Count > 1)
-                {
-                    List<string> leftRun = runs[0];
-                    List<string> rightRun = runs[1];
-                    List<string> mergedRun = MergeTwoRuns(leftRun, rightRun, keyIndex);
-                    runs.RemoveAt(0);
-                    runs.RemoveAt(0);
-                    runs.Add(mergedRun);
-                }
-
-                return runs[0];
-            }
-
-            private List<string> MergeTwoRuns(List<string> left, List<string> right, int keyIndex)
-            {
-                List<string> merged = new List<string>();
-                int i = 0, j = 0;
-
-                while (i < left.Count && j < right.Count)
-                {
-                    string leftKey = left[i].Split(',')[keyIndex];
-                    string rightKey = right[j].Split(',')[keyIndex];
-
-                    if (CompareKeys(leftKey, rightKey) <= 0)
-                    {
-                        merged.Add(left[i++]);
-                    }
-                    else
-                    {
-                        merged.Add(right[j++]);
-                    }
-                }
-
-                merged.AddRange(left.Skip(i));
-                merged.AddRange(right.Skip(j));
-
-                return merged;
-            }
-
-            private async Task DirectMergeSort(List<string> lines, int keyIndex)
-            {
-                LogTextBox.AppendText("Direct Merge Sort started...\n");
-
-                int n = lines.Count;
-                for (int width = 1; width < n; width *= 2)
-                {
-                    for (int i = 0; i < n; i += 2 * width)
-                    {
-                        int mid = Math.Min(i + width, n);
-                        int right = Math.Min(i + 2 * width, n);
-
-                        MergeInto(lines, i, mid, right, keyIndex);
-                        await Task.Delay(_delay);
-                    }
-                }
-
-                LogTextBox.AppendText("Direct Merge Sort completed.\n");
-            }
-
-            private async Task HeapSort(List<string> lines, int keyIndex)
-            {
-                LogTextBox.AppendText("Heap Sort started...\n");
-
-                int n = lines.Count;
-
-                for (int i = n / 2 - 1; i >= 0; i--)
-                {
-                    await Heapify(lines, n, i, keyIndex);
-                }
-
-                for (int i = n - 1; i > 0; i--)
-                {
-                    (lines[0], lines[i]) = (lines[i], lines[0]);
-                    await Heapify(lines, i, 0, keyIndex);
+                    rows = MergeRuns(runs, keyIndex);
                     await Task.Delay(_delay);
                 }
-
-                LogTextBox.AppendText("Heap Sort completed.\n");
             }
+            
+        }
 
-            private void MergeInto(List<string> lines, int left, int mid, int right, int keyIndex)
+        private int CompareKeys(string key1, string key2)
+        {
+            bool isNumeric1 = double.TryParse(key1, out double num1);
+            bool isNumeric2 = double.TryParse(key2, out double num2);
+
+            if (isNumeric1 && isNumeric2)
             {
-                List<string> temp = new List<string>();
-                int i = left, j = mid;
-
-                while (i < mid && j < right)
-                {
-                    string leftKey = lines[i].Split(',')[keyIndex];
-                    string rightKey = lines[j].Split(',')[keyIndex];
-
-                    if (CompareKeys(leftKey, rightKey) <= 0)
-                    {
-                        temp.Add(lines[i++]);
-                    }
-                    else
-                    {
-                        temp.Add(lines[j++]);
-                    }
-                }
-
-                temp.AddRange(lines.Skip(i).Take(mid - i));
-                temp.AddRange(lines.Skip(j).Take(right - j));
-
-                for (int k = 0; k < temp.Count; k++)
-                {
-                    lines[left + k] = temp[k];
-                }
+                return num1.CompareTo(num2);
             }
-
-            private async Task Heapify(List<string> lines, int n, int i, int keyIndex)
+            else
             {
-                int largest = i;
-                int left = 2 * i + 1;
-                int right = 2 * i + 2;
-
-                string largestKey = lines[largest].Split(',')[keyIndex];
-
-                if (left < n && CompareKeys(lines[left].Split(',')[keyIndex], largestKey) > 0)
-                {
-                    largest = left;
-                }
-
-                if (right < n && CompareKeys(lines[right].Split(',')[keyIndex], lines[largest].Split(',')[keyIndex]) > 0)
-                {
-                    largest = right;
-                }
-
-                if (largest != i)
-                {
-                    (lines[i], lines[largest]) = (lines[largest], lines[i]);
-                    await Heapify(lines, n, largest, keyIndex);
-                }
+                return string.Compare(key1, key2);
             }
         }
 
+        private List<IXLRow> MergeRuns(List<List<IXLRow>> runs, int keyIndex)
+        {
+            while (runs.Count > 1)
+            {
+                List<IXLRow> leftRun = runs[0];
+                List<IXLRow> rightRun = runs[1];
+                List<IXLRow> mergedRun = MergeTwoRuns(leftRun, rightRun, keyIndex);
+                runs.RemoveAt(0);
+                runs.RemoveAt(0);
+                runs.Add(mergedRun);
+            }
+
+            return runs[0];
+        }
+
+        private List<IXLRow> MergeTwoRuns(List<IXLRow> left, List<IXLRow> right, int keyIndex)
+        {
+            List<IXLRow> merged = new List<IXLRow>();
+            int i = 0, j = 0;
+
+            while (i < left.Count && j < right.Count)
+            {
+                string leftKey = left[i].Cell(keyIndex + 1).Value.ToString();
+                string rightKey = right[j].Cell(keyIndex + 1).Value.ToString();
+
+                if (CompareKeys(leftKey, rightKey) <= 0)
+                {
+                    merged.Add(left[i++]);
+                }
+                else
+                {
+                    merged.Add(right[j++]);
+                }
+            }
+
+            merged.AddRange(left.Skip(i));
+            merged.AddRange(right.Skip(j));
+
+            return merged;
+        }
+
+        private async Task DirectMergeSort(List<IXLRow> rows, int keyIndex)
+        {
+
+            int n = rows.Count;
+            for (int width = 1; width < n; width *= 2)
+            {
+                for (int i = 0; i < n; i += 2 * width)
+                {
+                    int mid = Math.Min(i + width, n);
+                    int right = Math.Min(i + 2 * width, n);
+
+                    MergeInto(rows, i, mid, right, keyIndex);
+                    await Task.Delay(_delay);
+                }
+            }
+            
+        }
+
+        private void MergeInto(List<IXLRow> rows, int left, int mid, int right, int keyIndex)
+        {
+            List<IXLRow> temp = new List<IXLRow>();
+            int i = left, j = mid;
+
+            while (i < mid && j < right)
+            {
+                string leftKey = rows[i].Cell(keyIndex + 1).Value.ToString();
+                string rightKey = rows[j].Cell(keyIndex + 1).Value.ToString();
+
+                if (CompareKeys(leftKey, rightKey) <= 0)
+                {
+                    temp.Add(rows[i++]);
+                }
+                else
+                {
+                    temp.Add(rows[j++]);
+                }
+            }
+
+            temp.AddRange(rows.Skip(i).Take(mid - i));
+            temp.AddRange(rows.Skip(j).Take(right - j));
+
+            for (int k = 0; k < temp.Count; k++)
+            {
+                rows[left + k] = temp[k];
+            }
+        }
+
+        private async Task HeapSort(List<IXLRow> rows, int keyIndex)
+        {
+
+            int n = rows.Count;
+            for (int i = n / 2 - 1; i >= 0; i--)
+            {
+                await Heapify(rows, n, i, keyIndex);
+            }
+            for (int i = n - 1; i > 0; i--)
+            {
+                (rows[0], rows[i]) = (rows[i], rows[0]);
+                await Heapify(rows, i, 0, keyIndex);
+                await Task.Delay(_delay);
+            }
+            
+        }
+
+        private async Task Heapify(List<IXLRow> rows, int n, int i, int keyIndex)
+        {
+            int largest = i;
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;
+
+            string largestKey = rows[largest].Cell(keyIndex + 1).Value.ToString();
+
+            if (left < n && CompareKeys(rows[left].Cell(keyIndex + 1).Value.ToString(), largestKey) > 0)
+            {
+                largest = left;
+            }
+
+            if (right < n && CompareKeys(rows[right].Cell(keyIndex + 1).Value.ToString(), rows[largest].Cell(keyIndex + 1).Value.ToString()) > 0)
+            {
+                largest = right;
+            }
+
+            if (largest != i)
+            {
+                (rows[i], rows[largest]) = (rows[largest], rows[i]);
+                await Heapify(rows, n, largest, keyIndex);
+            }
+        }
+
+    }
 }
 

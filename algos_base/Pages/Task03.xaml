@@ -44,11 +44,13 @@
                 <Label Content="Select File:" VerticalAlignment="Center" FontSize="18"/>
                 <Button  x:Name="BrowseButton" Content="Browse" Width="100" Height="40" Margin="10,0,0,0" Style="{StaticResource MainButtonStyle}"
                         Click="OnBrowseButtonClick"/>
+                
                 <Label Content="Sorting Method:" VerticalAlignment="Center" Margin="20,0,0,0" FontSize="18"/>
                 <ComboBox x:Name="SortingMethodComboBox" Width="200" Height="40" Margin="10,0" FontSize="18">
                     <ComboBoxItem Content="QuickSort"/>
                     <ComboBoxItem Content="RadixSort"/>
                 </ComboBox>
+                
                 <Button x:Name="StartButton" Content="Start Sorting" Width="150" Height="40" Margin="20,0,0,0" Style="{StaticResource MainButtonStyle}"
                         Click="OnStartSortingClick"/>
             </StackPanel>

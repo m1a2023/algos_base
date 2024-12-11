@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;  // Для измерения времени
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -65,29 +65,26 @@ namespace algos_base
 
             try
             {
-                // Сбросить и перезапустить таймер перед началом сортировки
                 _stopwatch.Restart();
                 _stopwatch.Start();
 
                 LogTextBoxAppendText($"Starting sorting using {selectedMethod}...\n");
 
-                // Загрузка слов из файла и очистка от символов
                 List<string> words = new List<string>(File.ReadLines(_filePath)
                     .SelectMany(line => line.Split(new[] { ' ', '\t', '\n', '\r', '.', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries)
                                             .Select(word => CleanWord(word))));
 
-                // Безопасное обновление UI
                 Dispatcher.Invoke(() => LogTextBox.AppendText($"File loaded. Number of words: {words.Count}\n"));
 
                 switch (selectedMethod)
                 {
                     case "QuickSort":
-                        await Task.Run(() => QuickSort(words, 0, words.Count - 1)); // Вызов QuickSort в фоновом потоке
+                        await Task.Run(() => QuickSort(words, 0, words.Count - 1));
                         Dispatcher.Invoke(() => LogTextBox.AppendText("Using QuickSort sorting method.\n"));
                         break;
 
                     case "RadixSort":
-                        await Task.Run(() => RadixSort(words)); // Вызов RadixSort в фоновом потоке
+                        await Task.Run(() => RadixSort(words));
                         Dispatcher.Invoke(() => LogTextBox.AppendText("Using RadixSort sorting method.\n"));
                         break;
 
@@ -96,13 +93,10 @@ namespace algos_base
                         return;
                 }
 
-                // Остановка времени после завершения сортировки
                 _stopwatch.Stop();
                 Dispatcher.Invoke(() => LogTextBox.AppendText($"Sorting completed in {_stopwatch.Elapsed.TotalMilliseconds} ms.\n"));
                 Dispatcher.Invoke(() => TimeTakenTextBlock.Text = $"Время выполнения: {_stopwatch.Elapsed.TotalMilliseconds} миллисекунд");
-
-                // Подсчет слов
-                await Task.Run(() => CountWords(words)); // Вызов CountWords в фоновом потоке
+                await Task.Run(() => CountWords(words));
 
                 Dispatcher.Invoke(() => LogTextBox.AppendText("Sorting and counting completed.\n"));
             }
@@ -113,7 +107,6 @@ namespace algos_base
         }
         private string CleanWord(string word)
         {
-            // Удаляем все символы, которые не являются буквами (a-z, A-Z)
             return new string(word.Where(c => char.IsLetter(c)).ToArray()).ToLower();
         }
 
@@ -122,8 +115,8 @@ namespace algos_base
             if (low < high)
             {
                 int pivotIndex = Partition(words, low, high);
-                await Task.Run(() => QuickSort(words, low, pivotIndex - 1)); // Вызов QuickSort в фоновом потоке
-                await Task.Run(() => QuickSort(words, pivotIndex + 1, high)); // Вызов QuickSort в фоновом потоке
+                await Task.Run(() => QuickSort(words, low, pivotIndex - 1));
+                await Task.Run(() => QuickSort(words, pivotIndex + 1, high));
             }
         }
 
@@ -164,19 +157,15 @@ namespace algos_base
 
                 foreach (var word in words)
                 {
-                    // Проверка, что позиция символа в слове существует
                     int charIndex = digitPosition < word.Length 
                         ? char.ToLower(word[word.Length - digitPosition - 1]) - 'a' 
                         : -1;
-
-                    // Если символ не является буквой (или не существует на этой позиции), добавляем в последний бакет
                     if (charIndex >= 0 && charIndex < 26)
                     {
                         buckets[charIndex].Add(word);
                     }
                     else
                     {
-                        // Все слова, которые не имеют буквы на данной позиции, помещаем в последний бакет
                         buckets[25].Add(word);
                     }
                 }
@@ -210,15 +199,11 @@ namespace algos_base
 
             int uniqueWords = wordCounts.Count;
             int totalWords = words.Count;
-
-            // Обновление интерфейса в UI-потоке
             Dispatcher.Invoke(() =>
             {
                 TotalWordsTextBlock.Text = $"Общее количество слов: {totalWords}";
                 UniqueWordsTextBlock.Text = $"Количество уникальных слов: {uniqueWords}";
             });
-
-            // Вывод всех слов и их количества в лог в фоновом потоке
             await Task.Run(() =>
             {
                 StringBuilder logOutput = new StringBuilder();
@@ -227,22 +212,16 @@ namespace algos_base
                 {
                     logOutput.AppendLine($"{wordCount.Key}: {wordCount.Value}");
                 }
-
-                // Обновление LogTextBox в главном потоке
                 Dispatcher.Invoke(() =>
                 {
                     LogTextBox.AppendText(logOutput.ToString());
                 });
             });
-
-            // Вывод в лог завершен
             Dispatcher.Invoke(() =>
             {
                 LogTextBox.AppendText("\nCounting words finished.\n");
             });
         }
-
-        // Метод для безопасного добавления текста в LogTextBox
         private void LogTextBoxAppendText(string text)
         {
             Dispatcher.Invoke(() =>
