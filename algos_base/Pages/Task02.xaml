@@ -31,11 +31,13 @@
                 Width="40" Height="40" Style="{StaticResource MainButtonStyle}" 
                 Click="PreviousPageButtonClick" FontSize="20" HorizontalContentAlignment="Center" 
                 VerticalContentAlignment="Center"/>
-        
+        <Viewbox Grid.Row="1" Grid.Column="0" Stretch="Uniform">
+            <Canvas x:Name="SortingCanvas" Background="LightGray" Width="600" Height="400" />
+        </Viewbox>
         <!-- Logs Section -->
         <TextBox x:Name="LogTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,20,0,0" 
                  IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" 
-                 FontSize="18" TextWrapping="Wrap" MaxWidth="600" Grid.Row="1" Grid.ColumnSpan="2"/>
+                 FontSize="18" TextWrapping="Wrap" MaxWidth="600" Grid.Row="1" Grid.Column="1" />
 
         <!-- Control Panel Section -->
         <Viewbox Grid.Row="2" Grid.ColumnSpan="2" Stretch="Uniform" Margin="5">
