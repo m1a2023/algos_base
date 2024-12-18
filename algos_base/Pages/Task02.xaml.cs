@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using ClosedXML.Excel;
 using Microsoft.Win32;
 
@@ -13,8 +14,7 @@ namespace algos_base
     public partial class Task02 : Page
     {
         private string _filePath;
-        private int _delay;
-
+        private int _rowsAmount = 0;
         public Task02()
         {
             InitializeComponent();
@@ -29,6 +29,13 @@ namespace algos_base
             LogTextBox.AppendText(message);
             LogTextBox.ScrollToEnd(); 
         }
+        
+        private async Task Delay()
+        {
+            int delay = (int)DelaySlider.Value;
+            await Task.Delay(delay);
+        }
+
         private void OnBrowseButtonClick(object sender, RoutedEventArgs e)
         {
             Log("Browse button clicked. Opening file dialog...\n");
@@ -143,6 +150,37 @@ namespace algos_base
                 Log($"Error during sorting: {ex.Message}\n");
             }
         }
+        
+        private void DrawRows(List<IXLRow> rows, int keyIndex)
+        {
+            Canvas.Children.Clear();
+            double yOffset = 10;
+            int rowCount = 0;
+
+            foreach (var row in rows)
+            {
+                string rowKey = row.Cell(keyIndex + 1).Value.ToString();
+                var textBlock = new TextBlock
+                {
+                    Text = rowKey,
+                    Width = 100,
+                    Height = 30,
+                    Background = rowCount == 0 ? new SolidColorBrush(Colors.LightGreen) : new SolidColorBrush(Colors.LightBlue),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(10, yOffset, 0, 0)
+                };
+                
+                if (rowCount != 0 && rowCount % 2 == 0)
+                {
+                    textBlock.Background = new SolidColorBrush(Colors.LightYellow);
+                }
+
+                Canvas.Children.Add(textBlock);
+                yOffset += 40;
+                rowCount++;
+            }
+        }
         private int CompareKeys(string key1, string key2)
         {
             bool isNumeric1 = double.TryParse(key1, out double num1);
@@ -162,22 +200,18 @@ namespace algos_base
         {
             Log("Starting Natural Merge Sort...\n");
 
-            // Открытие исходного файла и извлечение строк
             var workbook = new XLWorkbook(inputFilePath);
             var worksheet = workbook.Worksheet(1);
-            var rows = worksheet.RowsUsed().Skip(1).ToList(); // пропускаем заголовок
+            var rows = worksheet.RowsUsed().Skip(1).ToList();
 
             int n = rows.Count;
             int mergeStep = 0;
 
-            // Шаг 1: Найдём все "беги" (runs)
             List<(int start, int end)> runs = FindRuns(rows, keyIndex);
 
             Log("Step 1: Identifying runs...\n");
 
             List<string> tempFilePaths = new List<string>();
-
-            // Создаем временные файлы для каждого бега
             foreach (var run in runs)
             {
                 var tempWorkbook = new XLWorkbook();
@@ -195,8 +229,7 @@ namespace algos_base
 
                 Log($"Created temporary run file: {tempFilePath}\n");
             }
-
-            // Шаг 2: Слияние файлов
+            
             while (tempFilePaths.Count > 1)
             {
                 List<string> newTempFiles = new List<string>();
@@ -210,25 +243,17 @@ namespace algos_base
                         string leftFilePath = tempFilePaths[i];
                         string rightFilePath = tempFilePaths[i + 1];
 
-                        // Сливаем два файла в новый
                         string mergedFilePath = Path.Combine(Path.GetDirectoryName(inputFilePath), $"Merged_{mergeStep++}_" + Path.GetFileName(inputFilePath));
                         MergeFiles(leftFilePath, rightFilePath, mergedFilePath, keyIndex);
                         newTempFiles.Add(mergedFilePath);
 
                         Log($"Merged {leftFilePath} and {rightFilePath} into {mergedFilePath}\n");
                     }
-                    else
-                    {
-                        // Если нечётное количество, просто добавляем последний файл
-                        newTempFiles.Add(tempFilePaths[i]);
-                    }
+                    else newTempFiles.Add(tempFilePaths[i]);
+                    
                 }
-
-                // Обновляем список файлов для следующего шага
                 tempFilePaths = newTempFiles;
             }
-
-            // Шаг 3: Сохраняем итоговый результат
             if (tempFilePaths.Count == 1)
             {
                 string resultPath = Path.Combine(Path.GetDirectoryName(inputFilePath),
@@ -251,16 +276,12 @@ namespace algos_base
             {
                 string prevKey = rows[i - 1].Cell(keyIndex + 1).Value.ToString();
                 string currentKey = rows[i].Cell(keyIndex + 1).Value.ToString();
-
-                // Если порядок нарушен, начинаем новый бег
                 if (CompareKeys(prevKey, currentKey) > 0)
                 {
                     runs.Add((start, i));
                     start = i;
                 }
             }
-
-            // Добавляем последний бег
             runs.Add((start, n));
 
             Log($"Found {runs.Count} runs.");
@@ -273,24 +294,24 @@ namespace algos_base
 
             var workbook = new XLWorkbook(inputFilePath);
             var worksheet = workbook.Worksheet(1);
-            var rows = worksheet.RowsUsed().Skip(1).ToList(); // пропускаем заголовок
+            var rows = worksheet.RowsUsed().Skip(1).ToList();
 
             int n = rows.Count;
             int mergeStep = 0;
-
-            // Начальный этап: каждую строку считаем отдельным "сегментом"
             List<string> tempFilePaths = new List<string>();
 
             Log("Step 1: Creating individual temporary files for each row...\n");
+            
+            DrawRows(rows, keyIndex);
+            await Delay();
 
             for (int i = 0; i < n; i++)
             {
-                // Создаем новый файл для текущей строки
                 var tempWorkbook = new XLWorkbook();
                 var tempWorksheet = tempWorkbook.Worksheets.Add("MergedData");
 
                 CopyRowToWorksheet(rows[i], tempWorksheet, 1, keyIndex);
-                
+
                 string tempFilePath = Path.Combine(Path.GetDirectoryName(_filePath), $"Temp_{mergeStep++}_" + Path.GetFileName(_filePath));
                 tempWorkbook.SaveAs(tempFilePath);
                 tempFilePaths.Add(tempFilePath);
@@ -298,7 +319,6 @@ namespace algos_base
                 Log($"Created temporary file: {tempFilePath}\n");
             }
 
-            // Продолжаем слияние
             while (tempFilePaths.Count > 1)
             {
                 List<string> newTempFiles = new List<string>();
@@ -311,26 +331,23 @@ namespace algos_base
                     {
                         string leftFilePath = tempFilePaths[i];
                         string rightFilePath = tempFilePaths[i + 1];
-
-                        // Сливаем два файла в новый
                         string mergedFilePath = Path.Combine(Path.GetDirectoryName(_filePath), $"Merged_{mergeStep++}_" + Path.GetFileName(_filePath));
                         MergeFiles(leftFilePath, rightFilePath, mergedFilePath, keyIndex);
                         newTempFiles.Add(mergedFilePath);
 
                         Log($"Merged {leftFilePath} and {rightFilePath} into {mergedFilePath}\n");
+                        
+                        var mergedRows = LoadRowsFromFile(mergedFilePath);
+                        DrawRows(mergedRows, keyIndex);
+                        await Delay();
                     }
                     else
                     {
-                        // Если нечётное количество, просто добавляем последний файл
                         newTempFiles.Add(tempFilePaths[i]);
                     }
                 }
-
-                // Обновляем список файлов для следующего шага
                 tempFilePaths = newTempFiles;
             }
-
-            // Когда осталось только одно итоговое слияние, сохраняем результат
             if (tempFilePaths.Count == 1)
             {
                 string resultPath = Path.Combine(Path.GetDirectoryName(_filePath),
@@ -338,6 +355,12 @@ namespace algos_base
                 File.Copy(tempFilePaths[0], resultPath, true);
                 Log($"Sorting complete. Final sorted file saved as {resultPath}\n");
             }
+        }
+        private List<IXLRow> LoadRowsFromFile(string filePath)
+        {
+            var workbook = new XLWorkbook(filePath);
+            var worksheet = workbook.Worksheet(1);
+            return worksheet.RowsUsed().ToList();
         }
 
         private void MergeFiles(string leftFilePath, string rightFilePath, string outputFilePath, int keyIndex)
@@ -359,8 +382,6 @@ namespace algos_base
             int i = 0, j = 0, rowIdx = 1;
 
             Log("Step 3: Merging rows...\n");
-
-            // Слияние двух файлов
             while (i < leftRows.Count && j < rightRows.Count)
             {
                 string leftKey = leftRows[i].Cell(keyIndex + 1).Value.ToString();
@@ -377,8 +398,6 @@ namespace algos_base
                     j++;
                 }
             }
-
-            // Копируем оставшиеся строки
             while (i < leftRows.Count)
             {
                 CopyRowToWorksheet(leftRows[i], newWorksheet, rowIdx++, keyIndex);
@@ -407,48 +426,36 @@ namespace algos_base
         {
             Log("Starting Heap Sort...\n");
 
-            // Открытие исходного файла и извлечение строк
             var workbook = new XLWorkbook(inputFilePath);
             var worksheet = workbook.Worksheet(1);
-            var rows = worksheet.RowsUsed().Skip(1).ToList(); // пропускаем заголовок
+            var rows = worksheet.RowsUsed().Skip(1).ToList();
 
             int n = rows.Count;
 
             Log("Step 1: Building the heap...\n");
-
-            // Строим кучу (heap) для массива строк
+            DrawRows(rows, keyIndex);
+            
             for (int i = n / 2 - 1; i >= 0; i--)
             {
                 await Heapify(rows, n, i, keyIndex);
             }
 
             Log("Step 2: Sorting the heap...\n");
-
-            // Проводим сортировку
             for (int i = n - 1; i > 0; i--)
             {
-                // Меняем местами корень и последний элемент
                 (rows[0], rows[i]) = (rows[i], rows[0]);
-
-                // Сохраняем текущий результат в новый временный файл
                 var tempWorkbook = new XLWorkbook();
                 var tempWorksheet = tempWorkbook.Worksheets.Add("SortedData");
-                for (int j = 0; j < i; j++)
-                {
-                    CopyRowToWorksheet(rows[j], tempWorksheet, j + 1, keyIndex);
-                }
+
+                DrawRows(rows, keyIndex);
                 string tempFilePath = Path.Combine(Path.GetDirectoryName(inputFilePath), $"HeapSort_{i}.xlsx");
                 tempWorkbook.SaveAs(tempFilePath);
-
                 Log($"Heap after swap and before heapifying saved as: {tempFilePath}\n");
 
-                // Восстановление кучи для оставшейся части массива
                 await Heapify(rows, i, 0, keyIndex);
-
-                await Task.Delay(_delay);  // Добавление задержки, если необходимо
+                await Delay();
             }
 
-            // После завершения сортировки сохраняем итоговый файл
             string resultPath = Path.Combine(Path.GetDirectoryName(inputFilePath), "sorted_" + Path.GetFileName(inputFilePath));
             var finalWorkbook = new XLWorkbook();
             var finalWorksheet = finalWorkbook.Worksheets.Add("SortedData");
@@ -460,7 +467,6 @@ namespace algos_base
 
             Log($"Sorting complete. Final sorted file saved as {resultPath}\n");
         }
-
         private async Task Heapify(List<IXLRow> rows, int n, int i, int keyIndex)
         {
             int largest = i;
@@ -481,15 +487,16 @@ namespace algos_base
 
             if (largest != i)
             {
-                // Меняем местами строки
                 (rows[i], rows[largest]) = (rows[largest], rows[i]);
-
                 Log($"Swapping rows {i + 1} and {largest + 1}\n");
 
-                // Рекурсивно восстанавливаем кучу для затронутой части
+                DrawRows(rows, keyIndex);
                 await Heapify(rows, n, largest, keyIndex);
             }
         }
     }
 }
+
+
+
 
