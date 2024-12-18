@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 using ClosedXML.Excel;
 using Microsoft.Win32;
+using Path = System.IO.Path;
 
 namespace algos_base
 {
@@ -111,11 +114,11 @@ namespace algos_base
                 Log($"Key attribute: {keyAttribute}\n");
                 switch (selectedMethod)
                 {
-                    case "Natural Merge":
-                        await NaturalMergeSort(_filePath, keyIndex);
-                        break;
                     case "Direct Merge":
                         await DirectMergeSort(_filePath, keyIndex);
+                        break;
+                    case "Natural Merge":
+                        await NaturalMergeSort(_filePath, keyIndex);
                         break;
                     case "Heap Sort":
                         await HeapSort(_filePath, keyIndex);
@@ -124,26 +127,6 @@ namespace algos_base
                         Log("Error: Unsupported sorting method.\n");
                         return;
                 }
-                
-                var sortedFilePath = Path.Combine(Path.GetDirectoryName(_filePath), "sorted_" + Path.GetFileName(_filePath));
-                var newWorkbook = new XLWorkbook();
-                var newWorksheet = newWorkbook.Worksheets.Add("SortedData");
-                for (int i = 0; i < header.Count; i++)
-                {
-                    newWorksheet.Cell(1, i + 1).Value = header[i];
-                }
-                for (int rowIdx = 0; rowIdx < rows.Count; rowIdx++)
-                {
-                    var row = rows[rowIdx];
-                    for (int colIdx = 0; colIdx < row.Cells().Count(); colIdx++)
-                    {
-                        newWorksheet.Cell(rowIdx + 2, colIdx + 1).Value = row.Cell(colIdx + 1).Value;
-                    }
-                }
-
-                //newWorkbook.SaveAs(sortedFilePath);
-                //Log($"Sorted file saved at {sortedFilePath}\n");
-
             }
             catch (Exception ex)
             {
@@ -156,27 +139,44 @@ namespace algos_base
             Canvas.Children.Clear();
             double yOffset = 10;
             int rowCount = 0;
-
+    
             foreach (var row in rows)
             {
                 string rowKey = row.Cell(keyIndex + 1).Value.ToString();
+        
+                var rect = new Rectangle
+                {
+                    Width = 100,
+                    Height = 30,
+                    Fill = new SolidColorBrush(Colors.LightBlue),
+                    Stroke = new SolidColorBrush(Colors.Black),
+                    StrokeThickness = 1
+                };
                 var textBlock = new TextBlock
                 {
                     Text = rowKey,
                     Width = 100,
                     Height = 30,
-                    Background = rowCount == 0 ? new SolidColorBrush(Colors.LightGreen) : new SolidColorBrush(Colors.LightBlue),
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(10, yOffset, 0, 0)
+                    VerticalAlignment = VerticalAlignment.Center
                 };
-                
-                if (rowCount != 0 && rowCount % 2 == 0)
+                if (rowCount == 0)
                 {
-                    textBlock.Background = new SolidColorBrush(Colors.LightYellow);
+                    rect.Fill = new SolidColorBrush(Colors.LightGreen);
+                }
+                else if (rowCount % 2 == 0)
+                {
+                    rect.Fill = new SolidColorBrush(Colors.LightYellow);
                 }
 
+                Canvas.Children.Add(rect);
                 Canvas.Children.Add(textBlock);
+
+                Canvas.SetTop(rect, yOffset);
+                Canvas.SetLeft(rect, 10);
+                Canvas.SetTop(textBlock, yOffset);
+                Canvas.SetLeft(textBlock, 10);
+
                 yOffset += 40;
                 rowCount++;
             }
@@ -210,6 +210,8 @@ namespace algos_base
             List<(int start, int end)> runs = FindRuns(rows, keyIndex);
 
             Log("Step 1: Identifying runs...\n");
+            DrawRows(rows, keyIndex);
+            await Delay();
 
             List<string> tempFilePaths = new List<string>();
             foreach (var run in runs)
@@ -228,13 +230,18 @@ namespace algos_base
                 tempFilePaths.Add(tempFilePath);
 
                 Log($"Created temporary run file: {tempFilePath}\n");
+                DrawRows(rows, keyIndex);
+                await Delay();
             }
-            
+
             while (tempFilePaths.Count > 1)
             {
                 List<string> newTempFiles = new List<string>();
 
                 Log($"Step 2: Merging run files... Remaining files: {tempFilePaths.Count}\n");
+
+                DrawRows(rows, keyIndex);
+                await Delay();
 
                 for (int i = 0; i < tempFilePaths.Count; i += 2)
                 {
@@ -248,20 +255,33 @@ namespace algos_base
                         newTempFiles.Add(mergedFilePath);
 
                         Log($"Merged {leftFilePath} and {rightFilePath} into {mergedFilePath}\n");
+
+                        // Visualization: Draw rows after merging
+                        var mergedRows = LoadRowsFromFile(mergedFilePath);
+                        DrawRows(mergedRows, keyIndex);
+                        await Delay();
                     }
-                    else newTempFiles.Add(tempFilePaths[i]);
-                    
+                    else
+                    {
+                        newTempFiles.Add(tempFilePaths[i]);
+                    }
                 }
                 tempFilePaths = newTempFiles;
             }
+
             if (tempFilePaths.Count == 1)
             {
-                string resultPath = Path.Combine(Path.GetDirectoryName(inputFilePath),
-                    "sorted_" + Path.GetFileName(inputFilePath));
+                string resultPath = Path.Combine(Path.GetDirectoryName(inputFilePath), "sorted_" + Path.GetFileName(inputFilePath));
                 File.Copy(tempFilePaths[0], resultPath, true);
                 Log($"Sorting complete. Final sorted file saved as {resultPath}\n");
+
+                // Visualization: Draw final sorted rows
+                var finalRows = LoadRowsFromFile(tempFilePaths[0]);
+                DrawRows(finalRows, keyIndex);
+                await Delay();
             }
         }
+
 
         private List<(int start, int end)> FindRuns(List<IXLRow> rows, int keyIndex)
         {
@@ -467,6 +487,53 @@ namespace algos_base
 
             Log($"Sorting complete. Final sorted file saved as {resultPath}\n");
         }
+        
+        private async Task VisualizeSwap(List<IXLRow> rows, int index1, int index2, int keyIndex)
+        {
+            var rect1 = Canvas.Children.OfType<Rectangle>().ElementAt(index1);
+            var rect2 = Canvas.Children.OfType<Rectangle>().ElementAt(index2);
+    
+            var text1 = Canvas.Children.OfType<TextBlock>().ElementAt(index1);
+            var text2 = Canvas.Children.OfType<TextBlock>().ElementAt(index2);
+    
+            var animateRect1 = new DoubleAnimation
+            {
+                From = Canvas.GetTop(rect1),
+                To = Canvas.GetTop(rect2),
+                Duration = TimeSpan.FromMilliseconds(300)
+            };
+    
+            var animateRect2 = new DoubleAnimation
+            {
+                From = Canvas.GetTop(rect2),
+                To = Canvas.GetTop(rect1),
+                Duration = TimeSpan.FromMilliseconds(300)
+            };
+
+            var animateText1 = new DoubleAnimation
+            {
+                From = Canvas.GetTop(text1),
+                To = Canvas.GetTop(text2),
+                Duration = TimeSpan.FromMilliseconds(300)
+            };
+    
+            var animateText2 = new DoubleAnimation
+            {
+                From = Canvas.GetTop(text2),
+                To = Canvas.GetTop(text1),
+                Duration = TimeSpan.FromMilliseconds(300)
+            };
+    
+            rect1.BeginAnimation(Canvas.TopProperty, animateRect2);
+            rect2.BeginAnimation(Canvas.TopProperty, animateRect1);
+    
+            text1.BeginAnimation(Canvas.TopProperty, animateText2);
+            text2.BeginAnimation(Canvas.TopProperty, animateText1);
+            
+            await Task.Delay(350);
+            (rows[index1], rows[index2]) = (rows[index2], rows[index1]);
+        }
+
         private async Task Heapify(List<IXLRow> rows, int n, int i, int keyIndex)
         {
             int largest = i;
@@ -487,10 +554,8 @@ namespace algos_base
 
             if (largest != i)
             {
-                (rows[i], rows[largest]) = (rows[largest], rows[i]);
+                await VisualizeSwap(rows, i, largest, keyIndex);
                 Log($"Swapping rows {i + 1} and {largest + 1}\n");
-
-                DrawRows(rows, keyIndex);
                 await Heapify(rows, n, largest, keyIndex);
             }
         }

@@ -17,13 +17,14 @@
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Return button -->
-            <RowDefinition Height="*"/>    <!-- Log text box -->
+            <RowDefinition Height="*"/>    <!-- Canvas and Log text box -->
             <RowDefinition Height="60"/>   <!-- Controls with fixed height -->
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="60"/>   <!-- Slider row -->
         </Grid.RowDefinitions>
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         
         <!-- Back Button -->
@@ -32,11 +33,12 @@
                 Click="PreviousPageButtonClick" FontSize="20" HorizontalContentAlignment="Center" 
                 VerticalContentAlignment="Center"/>
         
+        <!-- Canvas -->
         <Viewbox Grid.Row="1" Grid.Column="0" Stretch="Uniform">
             <Canvas x:Name="Canvas" Background="LightGray" Width="600" Height="500" />
         </Viewbox>
         
-        <!-- Logs Section -->
+        <!-- Log TextBox -->
         <TextBox x:Name="LogTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,20,0,0" 
                  IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" 
                  FontSize="18" TextWrapping="Wrap" MaxWidth="600" Grid.Row="1" Grid.Column="1" />
@@ -44,11 +46,13 @@
         <!-- Control Panel Section -->
         <Viewbox Grid.Row="2" Grid.ColumnSpan="2" Stretch="Uniform" Margin="5">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0">
-                
                 <Label Content="Select File:" VerticalAlignment="Center" FontSize="18"/>
-                <Button  x:Name="BrowseButton" Content="Browse" Width="100" Height="40" Margin="10,0,0,0" Style="{StaticResource MainButtonStyle}"
-                         Click="OnBrowseButtonClick"/>
-            
+                <Button x:Name="BrowseButton" Content="Browse" Width="100" Height="40" Margin="10,0,0,0" Style="{StaticResource MainButtonStyle}"
+                        Click="OnBrowseButtonClick"/>
+                
+                <Label Content="Key Attribute:" VerticalAlignment="Center" FontSize="18"/>
+                <ComboBox x:Name="KeyAttributeComboBox" Width="200" Height="30" Margin="10,0"/>
+
                 <Label Content="Sorting Method:" VerticalAlignment="Center" FontSize="18"/>
                 <ComboBox x:Name="SortingMethodComboBox" Width="200" Height="30" Margin="10, 0">
                     <ComboBoxItem Content="Natural Merge" />
@@ -56,24 +60,16 @@
                     <ComboBoxItem Content="Heap Sort" />
                 </ComboBox>
                 
-                <Label Content="Key Attribute:" VerticalAlignment="Center" FontSize="18"/>
-                <ComboBox x:Name="KeyAttributeComboBox" Width="200" Height="30" Margin="10,0"/>
-                
-            </StackPanel>
-        </Viewbox>
-        
-        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                    Orientation="Horizontal" Margin="10">
-            <Label Content="Delay (ms):" VerticalAlignment="Center" FontSize="18" Margin="0, 0, 10, 0"/>
-            <Slider x:Name="DelaySlider" Minimum="1" Maximum="1000" Value="500" Width="200" Margin="10,0"/>
-            <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50" FontSize="18"/>
-        </StackPanel>
-        
-        <Viewbox Grid.Row="3" Grid.ColumnSpan="2" Stretch="Uniform" Margin="5">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                 <Button x:Name="StartButton" Content="Start Sorting" Width="150" Height="40" Margin="20,0,0,0" Style="{StaticResource MainButtonStyle}"
                         Click="OnStartSortingClick"/>
             </StackPanel>
         </Viewbox>
+
+        <!-- Slider Row: Centered slider -->
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Label Content="Delay (ms):" VerticalAlignment="Center" FontSize="18" Margin="0, 0, 10, 0"/>
+            <Slider x:Name="DelaySlider" Minimum="1" Maximum="1000" Value="500" Width="200" Margin="10,0"/>
+            <Label Content="{Binding ElementName=DelaySlider, Path=Value}" VerticalAlignment="Center" Width="50" FontSize="18"/>
+        </StackPanel>
     </Grid>
 </Page>
